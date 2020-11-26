@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ia_images/src/bloc/provider.dart';
 
 class LoginPage extends StatelessWidget {
   //const HomePage({Key key}) : super//(key: key);
@@ -19,7 +20,7 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-    Widget _crearFondo(size, orientation) {
+  Widget _crearFondo(size, orientation) {
     final fondo = Container(
       height: (orientation == Orientation.portrait ) 
       ?  size.height * 0.40 :  size.height * 0.60 , 
@@ -71,7 +72,7 @@ class LoginPage extends StatelessWidget {
   }
 
   Widget _loginForm(BuildContext context, size) {
-    //final bloc = Provider.of(context);
+    final bloc = Provider.of(context);
 
     return SingleChildScrollView(
       child: Column(
@@ -97,11 +98,11 @@ class LoginPage extends StatelessWidget {
               children: [
                 Text('Ingreso', style: TextStyle(fontSize: 20.0)),
                 SizedBox(height: 40.0),
-                _crearEmail(),
+                _crearEmail(bloc),
                 SizedBox(height: 30.0),
-                _crearPassword(),
+                _crearPassword(bloc),
                 SizedBox(height: 30.0),
-                _crearBoton(),
+                _crearBoton(bloc),
               ],
             ),
           ),
@@ -118,9 +119,10 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  Widget _crearEmail() {
+  Widget _crearEmail(LoginBloc bloc) {
     return StreamBuilder(
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
+      stream: bloc.emailStream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
           return Container(
             padding: EdgeInsets.symmetric(horizontal: 20.0),
             child: TextField(
@@ -133,15 +135,17 @@ class LoginPage extends StatelessWidget {
                   hintText: 'ejemplo@correo.com',
                   labelText: 'Correo electronico',
                   counterText: snapshot.data,
-                  errorText: snapshot.error),
-              onChanged: null,
+                  errorText: snapshot.error
+                  ),
+              onChanged: bloc.changeEmail,
             ),
           );
         });
   }
 
-  Widget _crearPassword( ) {
+  Widget _crearPassword(LoginBloc bloc) {
     return StreamBuilder(
+        stream: bloc.passwordStream,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           return Container(
             padding: EdgeInsets.symmetric(horizontal: 20.0),
@@ -155,15 +159,16 @@ class LoginPage extends StatelessWidget {
                   labelText: 'Contraseña',
                   counterText: snapshot.data,
                   errorText: snapshot.error),
-             // onChanged: (value) => changePassword(value),
+              //onChanged: (value) => changePassword(value),
+              onChanged: bloc.changePassword,
             ),
           );
         });
   }
 
-
-  Widget _crearBoton() {
+  Widget _crearBoton(LoginBloc bloc) {
     return StreamBuilder(
+      stream: bloc.formValidStream,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           return RaisedButton(
             shape: RoundedRectangleBorder(
@@ -175,20 +180,21 @@ class LoginPage extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 55.0, vertical: 15.0),
               child: Text('Iniciar'),
             ),
-           // onPressed: snapshot.hasData ? () => _login(context, bloc) : null,
+            onPressed: snapshot.hasData ? () => _login(context, bloc) : null,
           );
         });
   }
 
-  /* _login(BuildContext context, LoginBloc bloc) async {
-    Map info = await usuarioProvider.login(bloc.email, bloc.password);
+   _login(BuildContext context, LoginBloc bloc) async {
 
-    if (info['ok']) {
+     print("=========================");
+     print("email: ${bloc.email}");
+     print("password: ${bloc.password}");
+     print("=========================");
+
       Navigator.pushReplacementNamed(context, 'home');
-    } else {
-      utils.mostrarAlerta(context, info['mensaje']);
-    }
-  } */
+   
+  }
 
 }
 
