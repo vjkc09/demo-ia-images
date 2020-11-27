@@ -48,8 +48,13 @@ class OnBoardingPage extends StatelessWidget {
             );
           },
           itemCount: 3,
-          pagination: new SwiperPagination(),
-          control: new SwiperControl(),
+          pagination: SwiperPagination(            
+            builder: DotSwiperPaginationBuilder(
+                activeColor: Colors.pinkAccent,
+                color: Colors.black54,
+            )
+        )
+          //control: new SwiperControl(),
         ),
     );
   }
