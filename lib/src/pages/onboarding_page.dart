@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 
@@ -19,15 +17,17 @@ class OnBoardingPage extends StatelessWidget {
     final _screenSize = MediaQuery.of(context).size;     
 
     return Scaffold(
-      body: Column(
-          /* crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.end, */
-          children: [
-            _logoINE(_screenSize),
-            _swiperTarjetas(context, _screenSize),
-            _piePagina(),
-          ],
+      body: Center(
+        child: Column(
+            children: [
+              _logoINE(_screenSize),
+              _swiperTarjetas(context, _screenSize),
+               SizedBox(
+                    height:  _screenSize.height * 0.2,
+                  ),
+              _piePagina(),
+            ],
+        ),
       )
     );
   }
@@ -54,33 +54,31 @@ class OnBoardingPage extends StatelessWidget {
   Widget _swiperTarjetas(BuildContext context, _screenSize) {
     return Container(
           padding: EdgeInsets.only(top: 20.0),
-          width: double.infinity ,
-          height: _screenSize.height * 0.7,
+          width: _screenSize.width * 0.5,
+          height: _screenSize.height * 0.5,
           
           child: Swiper(
           layout: SwiperLayout.DEFAULT,
-          itemWidth: _screenSize.width * 0.8,
-          itemHeight: _screenSize.height * 0.5,
+          itemWidth: _screenSize.width * 0.9,
+          itemHeight: _screenSize.height * 0.9,
           itemCount: 3,
-          scrollDirection: Axis.horizontal,
-                //loop: true,
-                //duration: 1000,
-                //autoplay: true,
+          //scrollDirection: Axis.horizontal,
                 onIndexChanged: (index) {
                   debugPrint("index:$index");
-                  if(index == 2) {
+                 /*  if(index == 2) {
                    Timer(Duration(seconds: 5) , () {
                      Navigator.pushReplacementNamed(context, 'home');
                    });
-                  }
+                  } */
                 },
                 onTap: (index) {
                   debugPrint("Clicked on: $index");
                 },
-          pagination: SwiperPagination(            
+          pagination: SwiperPagination(   
             builder: DotSwiperPaginationBuilder(
                 activeColor: Colors.pinkAccent,
                 color: Colors.black54,
+                
             ),
           ),
           autoplayDisableOnInteraction : true,
@@ -90,7 +88,6 @@ class OnBoardingPage extends StatelessWidget {
             fit: BoxFit.fill,
             );
           },          
-          //control: new SwiperControl(),
         ),
     );
   }
