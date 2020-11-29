@@ -10,7 +10,7 @@ class HomePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title:Text('Home')
+        title:Text('Captura de votos')
       ),
       body:  Column(
           crossAxisAlignment: CrossAxisAlignment.center,

@@ -5,7 +5,7 @@ class OnBoardingPage extends StatelessWidget {
   //const OnBoardingPage({Key key}) : super(key: key);
 
   final pieStyle = TextStyle(fontSize: 13.0, color: Colors.grey[500]);
-
+  // Arreglo de imagenes
   final imageList = [
     'assets/img/humaaans_phone.png',
     'assets/img/humaaans_space.png',
@@ -14,6 +14,7 @@ class OnBoardingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Obtener el tamaño de los medios de comunicación actuales
     final _screenSize = MediaQuery.of(context).size;     
 
     return Scaffold(
@@ -62,7 +63,6 @@ class OnBoardingPage extends StatelessWidget {
           itemWidth: _screenSize.width * 0.9,
           itemHeight: _screenSize.height * 0.9,
           itemCount: 3,
-          //scrollDirection: Axis.horizontal,
                 onIndexChanged: (index) {
                   debugPrint("index:$index");
                  /*  if(index == 2) {
@@ -81,7 +81,6 @@ class OnBoardingPage extends StatelessWidget {
                 
             ),
           ),
-          autoplayDisableOnInteraction : true,
           itemBuilder: (BuildContext context,int index){
             return  Image.asset(
             imageList[index],
