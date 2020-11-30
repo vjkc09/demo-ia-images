@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ia_images/src/widgets/scan_button.dart';
 
 class HomePage extends StatelessWidget {
   //const HomePage({Key key}) : super//(key: key);
@@ -62,21 +63,7 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _botonQR(_screenSize) {
-    return Container(
-      margin: EdgeInsets.only(top: (_screenSize.height * 0.6)),
-      padding: EdgeInsets.symmetric(horizontal: 20.0),
-      child: RaisedButton(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0)),
-        elevation: 0.5,
-        color: colorRosa,
-        textColor: Colors.white,
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 55.0, vertical: 15.0),
-          child: Text('Escanear'),
-        ),
-        onPressed: () => null,
-      ),
-    );
+    return ScanButton();
   }
 
   Widget _appBar(BuildContext context) {
