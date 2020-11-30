@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 
@@ -65,11 +67,11 @@ class OnBoardingPage extends StatelessWidget {
           itemCount: 3,
                 onIndexChanged: (index) {
                   debugPrint("index:$index");
-                 /*  if(index == 2) {
-                   Timer(Duration(seconds: 5) , () {
+                   if(index == 2) {
+                   Timer(Duration(seconds: 10) , () {
                      Navigator.pushReplacementNamed(context, 'home');
                    });
-                  } */
+                  }
                 },
                 onTap: (index) {
                   debugPrint("Clicked on: $index");
