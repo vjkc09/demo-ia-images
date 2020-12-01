@@ -1,7 +1,11 @@
 import 'dart:io';
+
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
+
+import 'package:ia_images/src/models/scan_model.dart';
+export 'package:ia_images/src/models/scan_model.dart';
 
 class DBProvider {
 
@@ -16,7 +20,7 @@ class DBProvider {
     return _database;
   }
 
-    Future<Database> initDB() async {
+  Future<Database> initDB() async {
 
      // Path DB en dispositivo fisico
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
@@ -40,6 +44,27 @@ class DBProvider {
       },
     ); 
   }
+
+  // CREAR Registros
+  Future<int> nuevoScanRaw(ScanModel nuevoScan) async {
+    final db = await database;
+
+    final res = await db.rawInsert('''
+        INSERT INTO Scans (id, valor) 
+        VALUES (${nuevoScan.id}, '${nuevoScan.valor}') 
+    ''');
+    return res;
+  }
+
+  Future<int> nuevoScan( ScanModel nuevoScan) async {
+    final db = await database;
+
+    final res = await db.insert('Scans', nuevoScan.toJson() );
+    print(res);
+    // Id del ultimo registro insertado
+    return res;
+  }
+
 
 
 }

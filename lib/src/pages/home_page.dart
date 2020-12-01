@@ -13,7 +13,10 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
 
     //Pruba DB
-    DBProvider.db.database;
+    //DBProvider.db.database;
+
+    ScanModel nuevoScan = new ScanModel(valor: '21|1|9|599|1|C|0|72');
+    DBProvider.db.nuevoScan(nuevoScan);
 
     // Obtener el tamaño de los medios de comunicación actuales
     final _screenSize = MediaQuery.of(context).size;   
