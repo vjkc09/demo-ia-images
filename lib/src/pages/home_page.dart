@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:ia_images/src/providers/db_provider.dart';
+
 import 'package:ia_images/src/widgets/scan_button.dart';
 
 class HomePage extends StatelessWidget {
@@ -9,6 +11,10 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    //Pruba DB
+    DBProvider.db.database;
+
     // Obtener el tamaño de los medios de comunicación actuales
     final _screenSize = MediaQuery.of(context).size;   
     return Scaffold(
