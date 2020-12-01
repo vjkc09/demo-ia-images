@@ -15,10 +15,12 @@ class HomePage extends StatelessWidget {
     //Pruba DB
     //DBProvider.db.database;
 
-    ScanModel nuevoScan = new ScanModel(valor: '21|1|9|599|1|C|0|72');
+    //ScanModel nuevoScan = new ScanModel(valor: '21|1|9|599|1|C|0|72');
     //DBProvider.db.newScan(nuevoScan);
     //DBProvider.db.getScanById(6).then((scan) => print(scan.valor));
-    DBProvider.db.getScans().then((value) => print(value));
+    //DBProvider.db.getScans().then((value) => print(value));
+    //ScanModel nuevoScan = new ScanModel(id:6, valor: 'editado');
+    //DBProvider.db.updateScan(nuevoScan ).then((value) => print(value));
 
 
     // Obtener el tamaño de los medios de comunicación actuales
