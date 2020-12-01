@@ -46,7 +46,7 @@ class DBProvider {
   }
 
   // CREAR Registros
-  Future<int> nuevoScanRaw(ScanModel nuevoScan) async {
+  Future<int> newScanRaw(ScanModel nuevoScan) async {
     final db = await database;
 
     final res = await db.rawInsert('''
@@ -56,7 +56,7 @@ class DBProvider {
     return res;
   }
 
-  Future<int> nuevoScan( ScanModel nuevoScan) async {
+  Future<int> newScan( ScanModel nuevoScan) async {
     final db = await database;
 
     final res = await db.insert('Scans', nuevoScan.toJson() );
@@ -64,6 +64,32 @@ class DBProvider {
     // Id del ultimo registro insertado
     return res;
   }
+
+  // SELECT - Obtener Informacion
+  Future<ScanModel> getScanById( int id) async {
+    final db = await database;
+
+    final res = await db.query('Scans', where: 'id = ?', whereArgs: [id]);
+    return res.isNotEmpty 
+              ? ScanModel.fromJson(res.first) 
+              : null;
+
+  }
+
+  Future<List<ScanModel>> getScans() async {
+    // Get de referencia a la DB
+    final db = await database;
+
+    // Query obtener todos los registros
+    final res = await db.query('Scans');
+
+    List<ScanModel> list = res.isNotEmpty 
+                              ? res.map((s) => ScanModel.fromJson(s) ).toList()
+                              : [];
+    return list;
+
+  }
+
 
 
 

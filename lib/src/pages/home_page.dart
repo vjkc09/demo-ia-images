@@ -16,7 +16,10 @@ class HomePage extends StatelessWidget {
     //DBProvider.db.database;
 
     ScanModel nuevoScan = new ScanModel(valor: '21|1|9|599|1|C|0|72');
-    DBProvider.db.nuevoScan(nuevoScan);
+    //DBProvider.db.newScan(nuevoScan);
+    //DBProvider.db.getScanById(6).then((scan) => print(scan.valor));
+    DBProvider.db.getScans().then((value) => print(value));
+
 
     // Obtener el tamaño de los medios de comunicación actuales
     final _screenSize = MediaQuery.of(context).size;   
