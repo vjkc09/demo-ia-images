@@ -21,6 +21,8 @@ class HomePage extends StatelessWidget {
     //DBProvider.db.getScans().then((value) => print(value));
     //ScanModel nuevoScan = new ScanModel(id:6, valor: 'editado');
     //DBProvider.db.updateScan(nuevoScan ).then((value) => print(value));
+    //DBProvider.db.deleteScan(6);
+    //DBProvider.db.deleteScanAll().then(print);
 
 
     // Obtener el tamaño de los medios de comunicación actuales
