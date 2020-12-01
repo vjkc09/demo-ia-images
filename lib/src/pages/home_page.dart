@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+//import 'package:ia_images/src/providers/db_provider.dart';
+
+import 'package:ia_images/src/widgets/scan_button.dart';
 
 class HomePage extends StatelessWidget {
   //const HomePage({Key key}) : super//(key: key);
@@ -8,6 +11,20 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    //Pruba DB
+    //DBProvider.db.database;
+
+    //ScanModel nuevoScan = new ScanModel(valor: '21|1|9|599|1|C|0|72');
+    //DBProvider.db.newScan(nuevoScan);
+    //DBProvider.db.getScanById(6).then((scan) => print(scan.valor));
+    //DBProvider.db.getScans().then((value) => print(value));
+    //ScanModel nuevoScan = new ScanModel(id:6, valor: 'editado');
+    //DBProvider.db.updateScan(nuevoScan ).then((value) => print(value));
+    //DBProvider.db.deleteScan(6);
+    //DBProvider.db.deleteScanAll().then(print);
+
+
     // Obtener el tamaño de los medios de comunicación actuales
     final _screenSize = MediaQuery.of(context).size;   
     return Scaffold(
@@ -62,21 +79,7 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _botonQR(_screenSize) {
-    return Container(
-      margin: EdgeInsets.only(top: (_screenSize.height * 0.6)),
-      padding: EdgeInsets.symmetric(horizontal: 20.0),
-      child: RaisedButton(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0)),
-        elevation: 0.5,
-        color: colorRosa,
-        textColor: Colors.white,
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 55.0, vertical: 15.0),
-          child: Text('Escanear'),
-        ),
-        onPressed: () => null,
-      ),
-    );
+    return ScanButton();
   }
 
   Widget _appBar(BuildContext context) {
