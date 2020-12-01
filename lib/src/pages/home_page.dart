@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ia_images/src/providers/db_provider.dart';
+//import 'package:ia_images/src/providers/db_provider.dart';
 
 import 'package:ia_images/src/widgets/scan_button.dart';
 

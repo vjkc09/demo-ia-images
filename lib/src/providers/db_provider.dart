@@ -98,7 +98,6 @@ class DBProvider {
 
   }
 
-
   // Eliminar registros 
   Future<int> deleteScan(int id) async {
 
@@ -107,10 +106,17 @@ class DBProvider {
     return res;
   }
 
-  Future<int> deleteScanAll() async {
+  Future<int> deleteScanAll(int id) async {
 
     final db = await database;
-    final res = await db.rawInsert('DELETE FROM Scans');
+    final res = await db.delete('Scans');
+    return res;
+  }
+
+  Future<int> deleteRawScanAll() async {
+
+    final db = await database;
+    final res = await db.rawDelete('DELETE FROM Scans');
     return res;
   }
 
