@@ -2,8 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Se requiere permiso a la galeria.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Se requiere permiso de la cámara para escanear códigos de barras.</string>
+	<string>Se requiere permiso de la cámara.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Se requiere permiso del microfono.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
