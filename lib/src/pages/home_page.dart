@@ -14,7 +14,6 @@ class HomePage extends StatelessWidget {
 
     //Pruba DB
     //DBProvider.db.database;
-
     //ScanModel nuevoScan = new ScanModel(valor: '21|1|9|599|1|C|0|72');
     //DBProvider.db.newScan(nuevoScan);
     //DBProvider.db.getScanById(6).then((scan) => print(scan.valor));
