@@ -1,6 +1,9 @@
+//import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 //import 'package:ia_images/src/providers/db_provider.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:image_picker/image_picker.dart';
 
 class HomePage extends StatefulWidget {
   //const HomePage({Key key}) : super//(key: key);
@@ -14,6 +17,9 @@ class _HomePageState extends State<HomePage> {
 
   bool _botonQr = true;
   bool _botonFoto = false;
+
+  File foto;
+  final picker = ImagePicker();
 
   final pieStyle = TextStyle(fontSize: 13.0, color: Colors.grey[500]);
 
@@ -128,12 +134,31 @@ class _HomePageState extends State<HomePage> {
             padding: EdgeInsets.symmetric(horizontal: 55.0, vertical: 15.0),
             child: Text('Capturar'),
           ),
-          onPressed: () {
-            print('capturar');
-          }
+          onPressed: _tomarFoto
         ),
       ),
     );
+  }
+
+
+    /* void _seleccionarFoto() async {
+    _procesarImagen(ImageSource.gallery);
+  } */
+
+  void _tomarFoto() async {
+    _procesarImagen(ImageSource.camera);
+  }
+
+  void _procesarImagen(ImageSource origin) async {
+    final pickedFile = await picker.getImage(source: origin);
+
+    setState(() {
+      if (pickedFile != null) {
+        foto = File(pickedFile.path);
+        print(foto);
+      
+      }
+    });
   }
 
   Widget _appBar(BuildContext context) {
