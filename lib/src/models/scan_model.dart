@@ -3,7 +3,7 @@
 //     final scanModel = scanModelFromJson(jsonString);
 
 import 'dart:convert';
-import 'package:meta/meta.dart'; 
+//import 'package:meta/meta.dart'; 
 
 
 ScanModel scanModelFromJson(String str) => ScanModel.fromJson(json.decode(str));
@@ -13,7 +13,8 @@ String scanModelToJson(ScanModel data) => json.encode(data.toJson());
 class ScanModel {
     ScanModel({
         this.id,
-        @required this.valor,
+        //@required this.valor,
+        this.valor,
     });
 
     int id;
