@@ -128,7 +128,9 @@ class _HomePageState extends State<HomePage> {
             padding: EdgeInsets.symmetric(horizontal: 55.0, vertical: 15.0),
             child: Text('Capturar'),
           ),
-          onPressed: () {}
+          onPressed: () {
+            print('capturar');
+          }
         ),
       ),
     );
