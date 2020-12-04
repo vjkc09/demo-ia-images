@@ -79,71 +79,59 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _botonQR(_screenSize) {
-    
     return Visibility(
-        visible: _botonQr,
-          child: Container(
-        
+      visible: _botonQr,
+      child: Container(
         margin: EdgeInsets.only(top: (_screenSize.height * 0.6)),
         padding: EdgeInsets.symmetric(horizontal: 20.0),
         child: RaisedButton(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0)),
-          elevation: 0.5,
-          color: colorRosa,
-          textColor: Colors.white,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 55.0, vertical: 15.0),
-            child: Text('Escanear'),
-          ),
-          onPressed: () async {
-
-            barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-                                                      '#ED008C', 
-                                                      'Cancelar', 
-                                                      false, 
-                                                      ScanMode.QR);
-            print('escaneo: $barcodeScanRes');
-            if (barcodeScanRes != '-1') {
-              print('escaneo if: $barcodeScanRes');
-              setState(() {
-                _botonQr = false; 
-                _botonFoto = true;
-              });
-            
-            }
-          },
-        ),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.0)),
+            elevation: 0.5,
+            color: colorRosa,
+            textColor: Colors.white,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 55.0, vertical: 15.0),
+              child: Text('Escanear'),
+            ),
+            onPressed: _tomarQR),
       ),
     );
   }
 
-   Widget _botonImage(_screenSize) {
-    
+  Widget _botonImage(_screenSize) {
     return Visibility(
-        visible: _botonFoto,
-          child: Container(
-        
+      visible: _botonFoto,
+      child: Container(
         margin: EdgeInsets.only(top: (_screenSize.height * 0.6)),
         padding: EdgeInsets.symmetric(horizontal: 20.0),
         child: RaisedButton(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0)),
-          elevation: 0.5,
-          color: colorRosa,
-          textColor: Colors.white,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 55.0, vertical: 15.0),
-            child: Text('Capturar'),
-          ),
-          onPressed: _tomarFoto
-        ),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.0)),
+            elevation: 0.5,
+            color: colorRosa,
+            textColor: Colors.white,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 55.0, vertical: 15.0),
+              child: Text('Capturar'),
+            ),
+            onPressed: _tomarFoto),
       ),
     );
   }
 
-
-    /* void _seleccionarFoto() async {
-    _procesarImagen(ImageSource.gallery);
-  } */
+  void _tomarQR() async {
+    barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+        '#ED008C', 'Cancelar', false, ScanMode.QR);
+    print('escaneo: $barcodeScanRes');
+    if (barcodeScanRes != '-1') {
+      print('escaneo if: $barcodeScanRes');
+      setState(() {
+        _botonQr = false;
+        _botonFoto = true;
+      });
+    }
+  }
 
   void _tomarFoto() async {
     _procesarImagen(ImageSource.camera);
@@ -156,7 +144,7 @@ class _HomePageState extends State<HomePage> {
       if (pickedFile != null) {
         foto = File(pickedFile.path);
         print(foto);
-      
+        _botonFoto = false;
       }
     });
   }

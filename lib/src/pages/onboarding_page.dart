@@ -1,4 +1,4 @@
-import 'dart:async';
+//import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
@@ -9,9 +9,9 @@ class OnBoardingPage extends StatelessWidget {
   final pieStyle = TextStyle(fontSize: 13.0, color: Colors.grey[500]);
   // Arreglo de imagenes
   final imageList = [
-    'assets/img/humaaans_phone.png',
-    'assets/img/humaaans_space.png',
-    'assets/img/humaaans_wireframe.png',
+    'assets/img/group_27.png',
+    'assets/img/group_28.png',
+    'assets/img/group_30.png',
   ];
 
   @override
@@ -20,6 +20,7 @@ class OnBoardingPage extends StatelessWidget {
     final _screenSize = MediaQuery.of(context).size;     
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Center(
         child: Column(
             children: [
@@ -57,7 +58,7 @@ class OnBoardingPage extends StatelessWidget {
   Widget _swiperTarjetas(BuildContext context, _screenSize) {
     return Container(
           padding: EdgeInsets.only(top: 20.0),
-          width: _screenSize.width * 0.5,
+          width: _screenSize.width * 0.75,
           height: _screenSize.height * 0.5,
           
           child: Swiper(
@@ -66,12 +67,12 @@ class OnBoardingPage extends StatelessWidget {
           itemHeight: _screenSize.height * 0.9,
           itemCount: 3,
                 onIndexChanged: (index) {
-                  debugPrint("index:$index");
+                  /* debugPrint("index:$index");
                    if(index == 2) {
                    Timer(Duration(seconds: 10) , () {
                      Navigator.pushReplacementNamed(context, 'home');
                    });
-                  }
+                  } */
                 },
                 onTap: (index) {
                   debugPrint("Clicked on: $index");
@@ -84,9 +85,12 @@ class OnBoardingPage extends StatelessWidget {
             ),
           ),
           itemBuilder: (BuildContext context,int index){
-            return  Image.asset(
-            imageList[index],
-            fit: BoxFit.fill,
+            return  Container(
+              padding: EdgeInsets.only(bottom: 30.0),
+                          child: Image.asset(
+              imageList[index],
+              fit: BoxFit.fill,
+              ),
             );
           },          
         ),
