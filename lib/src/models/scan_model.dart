@@ -15,18 +15,23 @@ class ScanModel {
         this.id,
         //@required this.valor,
         this.valor,
+        this.fotoUrl
     });
 
     int id;
     String valor;
+    String fotoUrl;
+
 
     factory ScanModel.fromJson(Map<String, dynamic> json) => ScanModel(
         id: json["id"],
         valor: json["valor"],
+        fotoUrl: json["fotoUrl"],
     );
 
     Map<String, dynamic> toJson() => {
         "id": id,
         "valor": valor,
+        "fotoUrl": fotoUrl,
     };
 }

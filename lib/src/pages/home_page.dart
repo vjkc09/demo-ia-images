@@ -134,17 +134,20 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _tomarFoto() async {
+    print("tomar foto");
     _procesarImagen(ImageSource.camera);
+    setState(() { });
   }
 
   void _procesarImagen(ImageSource origin) async {
+    print('procesar imagen');
     final pickedFile = await picker.getImage(source: origin);
 
     setState(() {
       if (pickedFile != null) {
         foto = File(pickedFile.path);
         print(foto);
-        _botonFoto = false;
+        //_botonFoto = false;
       }
     });
   }
