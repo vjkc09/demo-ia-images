@@ -1,7 +1,10 @@
 //import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:ia_images/src/models/scan_model.dart';
 //import 'package:ia_images/src/providers/db_provider.dart';
+import 'package:ia_images/src/providers/scan_list_provider.dart';
+
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -13,6 +16,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
+  ScanModel scanModel = new ScanModel();
+  ScanListProvider scanListProvider = new ScanListProvider();
+
   String barcodeScanRes;
 
   bool _botonQr = true;
@@ -129,6 +136,7 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _botonQr = false;
         _botonFoto = true;
+        scanModel.valor = barcodeScanRes;
       });
     }
   }
@@ -136,7 +144,7 @@ class _HomePageState extends State<HomePage> {
   void _tomarFoto() async {
     print("tomar foto");
     _procesarImagen(ImageSource.camera);
-    setState(() { });
+    setState(() { });    
   }
 
   void _procesarImagen(ImageSource origin) async {
@@ -148,8 +156,18 @@ class _HomePageState extends State<HomePage> {
         foto = File(pickedFile.path);
         print(foto);
         //_botonFoto = false;
-      }
+      }      
     });
+
+    if (foto != null ) {
+      scanModel.fotoUrl = await scanListProvider.subirImagen(foto);
+      print('===============================');
+      print(scanModel.valor);
+      print( scanModel.fotoUrl);
+      print('===============================');
+      foto = null;
+    }
+
   }
 
   Widget _appBar(BuildContext context) {
