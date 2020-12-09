@@ -154,8 +154,7 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       if (pickedFile != null) {
         foto = File(pickedFile.path);
-        print(foto);
-        //_botonFoto = false;
+        print(foto);        
       }      
     });
 
@@ -166,7 +165,10 @@ class _HomePageState extends State<HomePage> {
       print( scanModel.fotoUrl);
       print('===============================');
       foto = null;
+      _botonFoto = false;
     }
+
+    setState(() { });
 
   }
 
