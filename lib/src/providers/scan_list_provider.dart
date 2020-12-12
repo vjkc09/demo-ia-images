@@ -3,10 +3,32 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 import 'package:mime_type/mime_type.dart';
 
 class ScanListProvider {
+
+  // Arreglo para inicializar estados
+  List<dynamic> infoCasilla = [];
+
+  dataCasilla(String data) async {
+    print("===============================");
+    print('data: $data');
+    infoCasilla = data.split('|');
+    print('info: $infoCasilla');    
+    print(infoCasilla[0]);
+    print("===============================");
+
+    cargarDataEstados();
+
+  }
+
+  void cargarDataEstados() {
+
+    rootBundle.loadString('data/estados.json')
+                .then((value) => print(value));
+  }
 
 // Subir imagen
   Future<String> subirImagen(File imagen ) async {
@@ -46,5 +68,6 @@ class ScanListProvider {
     return respData['secure_url'];
     
   }
+
   
 }

@@ -32,6 +32,23 @@ class _HomePageState extends State<HomePage> {
 
   final Color colorRosa = Color.fromRGBO(237, 0, 140, 1);
 
+
+  bool isEnabled = true ;
+
+  enableButton(){
+
+    setState(() {
+      isEnabled = true;
+    });
+  }
+
+  disableButton(){
+
+    setState(() {
+      isEnabled = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // Obtener el tamaño de los medios de comunicación actuales
@@ -122,7 +139,7 @@ class _HomePageState extends State<HomePage> {
               padding: EdgeInsets.symmetric(horizontal: 55.0, vertical: 15.0),
               child: Text('Capturar'),
             ),
-            onPressed: _tomarFoto),
+            onPressed: isEnabled ? _tomarFoto : null,),
       ),
     );
   }
@@ -130,40 +147,34 @@ class _HomePageState extends State<HomePage> {
   void _tomarQR() async {
     barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
         '#ED008C', 'Cancelar', false, ScanMode.QR);
-    print('escaneo: $barcodeScanRes');
+    scanListProvider.dataCasilla(barcodeScanRes);
     if (barcodeScanRes != '-1') {
-      print('escaneo if: $barcodeScanRes');
       setState(() {
         _botonQr = false;
         _botonFoto = true;
         scanModel.valor = barcodeScanRes;
       });
     }
+  
   }
 
-  void _tomarFoto() async {
-    print("tomar foto");
+  _tomarFoto() async {
     _procesarImagen(ImageSource.camera);
-    setState(() { });    
+    setState(() {  });    
   }
 
   void _procesarImagen(ImageSource origin) async {
-    print('procesar imagen');
     final pickedFile = await picker.getImage(source: origin);
 
     setState(() {
       if (pickedFile != null) {
-        foto = File(pickedFile.path);
-        print(foto);        
+        foto = File(pickedFile.path);      
+        disableButton();
       }      
     });
 
     if (foto != null ) {
       scanModel.fotoUrl = await scanListProvider.subirImagen(foto);
-      print('===============================');
-      print(scanModel.valor);
-      print( scanModel.fotoUrl);
-      print('===============================');
       foto = null;
       _botonFoto = false;
     }
