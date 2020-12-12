@@ -12,22 +12,27 @@ class ScanListProvider {
   // Arreglo para inicializar estados
   List<dynamic> infoCasilla = [];
 
+
   dataCasilla(String data) async {
-    print("===============================");
-    print('data: $data');
-    infoCasilla = data.split('|');
-    print('info: $infoCasilla');    
-    print(infoCasilla[0]);
-    print("===============================");
 
-    cargarDataEstados();
-
+   infoCasilla = data.split('|'); 
+   final estado = infoCasilla[0];
+   final  estadoValor = await cargarDataEstados(estado);
+   print(estadoValor);
   }
 
-  void cargarDataEstados() {
+  cargarDataEstados(estado) async {
 
-    rootBundle.loadString('data/estados.json')
-                .then((value) => print(value));
+    // Obtengo la posicion en el mapa
+    final estadoLista = int.parse(estado) - 1;
+    // Trabajo con archivo local
+    final resp = await rootBundle.loadString('data/estados.json');
+        Map dataMap = json.decode(resp);
+        final estadoResultado = dataMap['estados'][estadoLista];
+        // Obtengo el valor de la llave
+        final estadoValor = estadoResultado[estado]; 
+
+        return estadoValor;
   }
 
 // Subir imagen
