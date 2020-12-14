@@ -11,28 +11,42 @@ class ScanListProvider {
 
   // Arreglo para inicializar estados
   List<dynamic> infoCasilla = [];
+  List<dynamic> infoCasillaProcesada = [];
 
 
-  dataCasilla(String data) async {
+  Future<List<dynamic>> dataCasilla(String data) async {
 
    infoCasilla = data.split('|'); 
    final estado = infoCasilla[0];
-   final  estadoValor = await cargarDataEstados(estado);
-   print(estadoValor);
+   final distrito = infoCasilla[1];
+   final tipoActa = '?';
+   final seccion = infoCasilla[3];
+   final casilla = infoCasilla[5] + infoCasilla[4];
+   final estadoNombre = await cargarDataEstados(estado);
+   print('#####################################');
+   print(infoCasilla);
+   infoCasillaProcesada..add(estadoNombre)
+                       ..add(distrito)
+                       ..add(tipoActa)
+                       ..add(seccion)
+                       ..add(casilla);
+   print(infoCasillaProcesada);
+   return infoCasillaProcesada;
+
   }
 
-  cargarDataEstados(estado) async {
+  Future<dynamic> cargarDataEstados(estado) async {
 
     // Obtengo la posicion en el mapa
     final estadoLista = int.parse(estado) - 1;
     // Trabajo con archivo local
     final resp = await rootBundle.loadString('data/estados.json');
-        Map dataMap = json.decode(resp);
-        final estadoResultado = dataMap['estados'][estadoLista];
-        // Obtengo el valor de la llave
-        final estadoValor = estadoResultado[estado]; 
+    Map dataMap = json.decode(resp);
+    final estadoResultado = dataMap['estados'][estadoLista];
+    // Obtengo el valor de la llave
+    final estadoValor = estadoResultado[estado]; 
 
-        return estadoValor;
+    return estadoValor;
   }
 
 // Subir imagen
