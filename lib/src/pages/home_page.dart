@@ -27,23 +27,18 @@ class _HomePageState extends State<HomePage> {
 
   File foto;
   final picker = ImagePicker();
-
   final pieStyle = TextStyle(fontSize: 13.0, color: Colors.grey[500]);
-
   final Color colorRosa = Color.fromRGBO(237, 0, 140, 1);
-
-
+  final List<dynamic> test = [];
   bool isEnabled = true ;
 
   enableButton(){
-
     setState(() {
       isEnabled = true;
     });
   }
 
   disableButton(){
-
     setState(() {
       isEnabled = false;
     });
@@ -77,22 +72,28 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _campos() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _infoCasilla('Estado', 'Chihuahua'),
-          _infoCasilla('Distrito', '1'),
-          _infoCasilla('Tipo de Acta', '2'),
-          _infoCasilla('Sección', '540'),
-          _infoCasilla('Casilla', 'E1'),
-        ],
-      ),
+    return StreamBuilder(
+          stream: scanListProvider.infoCasillaStream,
+          //initialData: [],
+          builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot ){             
+            return Container(
+                padding: EdgeInsets.symmetric(horizontal: 20.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _infoCasilla('Estado',  snapshot.hasData ?  snapshot.data[0].toString() : '?'),
+                    _infoCasilla('Distrito', snapshot.hasData ? snapshot.data[1].toString() : '?'),
+                    _infoCasilla('Tipo de Acta',snapshot.hasData ? snapshot.data[2].toString(): '?'),
+                    _infoCasilla('Sección',snapshot.hasData ? snapshot.data[3].toString() : '?'),
+                    _infoCasilla('Casilla',snapshot.hasData ? snapshot.data[4].toString() : '?'),
+                  ],
+                ),
+              );
+          },
     );
   }
 
-  _infoCasilla(String texto, String data) {
+  _infoCasilla(String texto,  data) {
     return Column(
       children: [
         Text(texto, style: TextStyle(fontSize: 10)),
@@ -153,6 +154,7 @@ class _HomePageState extends State<HomePage> {
         _botonQr = false;
         _botonFoto = true;
         scanModel.valor = barcodeScanRes;
+       // scanListProvider.
       });
     }
   
