@@ -19,6 +19,7 @@ class _HomePageState extends State<HomePage> {
 
   ScanModel scanModel = new ScanModel();
   ScanListProvider scanListProvider = new ScanListProvider();
+  final scaffoldKey = GlobalKey<ScaffoldState>();
 
   String barcodeScanRes;
 
@@ -37,7 +38,6 @@ class _HomePageState extends State<HomePage> {
       isEnabled = true;
     });
   }
-
   disableButton(){
     setState(() {
       isEnabled = false;
@@ -49,6 +49,7 @@ class _HomePageState extends State<HomePage> {
     // Obtener el tamaño de los medios de comunicación actuales
     final _screenSize = MediaQuery.of(context).size;
     return Scaffold(
+      key: scaffoldKey,
       appBar: _appBar(context),
       body: ListView(
         children: [
@@ -150,11 +151,11 @@ class _HomePageState extends State<HomePage> {
         '#ED008C', 'Cancelar', false, ScanMode.QR);
     scanListProvider.dataCasilla(barcodeScanRes);
     if (barcodeScanRes != '-1') {
+      mostrarSnackbar('Codigo QR procesado');
       setState(() {
         _botonQr = false;
         _botonFoto = true;
         scanModel.valor = barcodeScanRes;
-       // scanListProvider.
       });
     }
   
@@ -170,7 +171,8 @@ class _HomePageState extends State<HomePage> {
 
     setState(() {
       if (pickedFile != null) {
-        foto = File(pickedFile.path);      
+        foto = File(pickedFile.path);
+        mostrarSnackbar('Imagen procesandose');           
         disableButton();
       }      
     });
@@ -180,7 +182,7 @@ class _HomePageState extends State<HomePage> {
       foto = null;
       _botonFoto = false;
     }
-
+    
     setState(() { });
 
   }
@@ -260,5 +262,19 @@ class _HomePageState extends State<HomePage> {
           child: Text('INE | 2020 Todos los derechos son reservados',
               style: pieStyle)),
     );
+  }
+
+   void mostrarSnackbar(String mensaje) {
+    final snackbar = SnackBar(
+      content: Container(   
+        child: Text(mensaje)
+        ),
+      backgroundColor: Colors.teal,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5))),
+      behavior: SnackBarBehavior.floating,
+      
+      duration: Duration(milliseconds: 2000),
+    );
+    scaffoldKey.currentState.showSnackBar(snackbar);
   }
 }
