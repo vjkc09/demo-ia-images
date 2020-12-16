@@ -1,0 +1,96 @@
+{
+    "partido": [{
+            "rutalogopartido": "https://upload.wikimedia.org/wikipedia/commons/0/0a/No-image-available.png",
+            "texto": "cincuenta y cinco",
+            "numero": "55"
+        },
+        {
+            "rutalogopartido": "https://upload.wikimedia.org/wikipedia/commons/0/0a/No-image-available.png",
+            "texto": "siete",
+            "numero": "7"
+        },
+        {
+            "rutalogopartido": "https://upload.wikimedia.org/wikipedia/commons/0/0a/No-image-available.png",
+            "texto": "dos",
+            "numero": "2"
+        },
+        {
+            "rutalogopartido": "https://upload.wikimedia.org/wikipedia/commons/0/0a/No-image-available.png",
+            "texto": "ocho",
+            "numero": "8"
+        },
+        {
+            "rutalogopartido": "https://upload.wikimedia.org/wikipedia/commons/0/0a/No-image-available.png",
+            "texto": "tres",
+            "numero": "3"
+        },
+        {
+            "rutalogopartido": "https://upload.wikimedia.org/wikipedia/commons/0/0a/No-image-available.png",
+            "texto": "cero",
+            "numero": "0"
+        },
+        {
+            "rutalogopartido": "https://upload.wikimedia.org/wikipedia/commons/0/0a/No-image-available.png",
+            "texto": "setenta y cinco",
+            "numero": "75"
+        }
+    ],
+    "candidaturacomun": [{
+            "rutalogopartido": "https://upload.wikimedia.org/wikipedia/commons/0/0a/No-image-available.png",
+            "texto": "cero",
+            "numero": "0"
+        },
+        {
+            "rutalogopartido": "https://upload.wikimedia.org/wikipedia/commons/0/0a/No-image-available.png",
+            "texto": "cero",
+            "numero": "0"
+        },
+        {
+            "rutalogopartido": "https://upload.wikimedia.org/wikipedia/commons/0/0a/No-image-available.png",
+            "texto": "cero",
+            "numero": "0"
+        },
+        {
+            "rutalogopartido": "https://upload.wikimedia.org/wikipedia/commons/0/0a/No-image-available.png",
+            "texto": "cero",
+            "numero": "0"
+        }
+    ],
+    "coalicion": [{
+            "rutalogopartido": "https://upload.wikimedia.org/wikipedia/commons/0/0a/No-image-available.png",
+            "texto": "cuatro",
+            "numero": "0"
+        },
+        {
+            "rutalogopartido": "https://upload.wikimedia.org/wikipedia/commons/0/0a/No-image-available.png",
+            "texto": "cero",
+            "numero": "0"
+        },
+        {
+            "rutalogopartido": "https://upload.wikimedia.org/wikipedia/commons/0/0a/No-image-available.png",
+            "texto": "cero",
+            "numero": "0"
+        },
+        {
+            "rutalogopartido": "https://upload.wikimedia.org/wikipedia/commons/0/0a/No-image-available.png",
+            "texto": "cero",
+            "numero": "0"
+        }
+    ],
+    "candidatosnoregistrados": [{
+        "texto": "cero",
+        "numero": "0"
+
+    }],
+    "votosnulos": [{
+        "texto": "cuatro",
+        "numero": "4"
+
+    }],
+    "total": [{
+        "texto": "total",
+        "numero": "150"
+
+    }]
+
+}
