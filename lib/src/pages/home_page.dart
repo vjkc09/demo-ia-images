@@ -17,7 +17,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   ScanModel scanModel = new ScanModel();
   ScanListProvider scanListProvider = new ScanListProvider();
   ImageIAProvider imageProvider = new ImageIAProvider();
@@ -26,20 +25,22 @@ class _HomePageState extends State<HomePage> {
   bool _botonQr = true;
   bool _botonFoto = false;
   File foto;
-  bool isEnabled = true ;
+  bool isEnabled = true;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final picker = ImagePicker();
-  final pieStyle = TextStyle(fontSize: 13.0, color: Colors.grey[500]);
-  final Color colorRosa = Color.fromRGBO(237, 0, 140, 1);
   final List<dynamic> test = [];
+  final Color colorRosa = Color.fromRGBO(237, 0, 140, 1);
+  final pieStyle = TextStyle(fontSize: 13.0, color: Colors.grey[500]);
+  final tituloTabla =  TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold);
 
-  enableButton(){
+  enableButton() {
     setState(() {
       isEnabled = true;
     });
   }
-  disableButton(){
+
+  disableButton() {
     setState(() {
       isEnabled = false;
     });
@@ -58,7 +59,7 @@ class _HomePageState extends State<HomePage> {
           _campos(),
           _botonQR(_screenSize),
           _botonImage(_screenSize),
-          
+          _tablaVotos(),
           _piePagina()
         ],
       ),
@@ -76,27 +77,32 @@ class _HomePageState extends State<HomePage> {
 
   Widget _campos() {
     return StreamBuilder(
-          stream: scanListProvider.infoCasillaStream,
-          //initialData: [],
-          builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot ){             
-            return Container(
-                padding: EdgeInsets.symmetric(horizontal: 20.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _infoCasilla('Estado',  snapshot.hasData ?  snapshot.data[0].toString() : '?'),
-                    _infoCasilla('Distrito', snapshot.hasData ? snapshot.data[1].toString() : '?'),
-                    _infoCasilla('Tipo de Acta',snapshot.hasData ? snapshot.data[2].toString(): '?'),
-                    _infoCasilla('Sección',snapshot.hasData ? snapshot.data[3].toString() : '?'),
-                    _infoCasilla('Casilla',snapshot.hasData ? snapshot.data[4].toString() : '?'),
-                  ],
-                ),
-              );
-          },
+      stream: scanListProvider.infoCasillaStream,
+      //initialData: [],
+      builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 20.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _infoCasilla('Estado',
+                  snapshot.hasData ? snapshot.data[0].toString() : '?'),
+              _infoCasilla('Distrito',
+                  snapshot.hasData ? snapshot.data[1].toString() : '?'),
+              _infoCasilla('Tipo de Acta',
+                  snapshot.hasData ? snapshot.data[2].toString() : '?'),
+              _infoCasilla('Sección',
+                  snapshot.hasData ? snapshot.data[3].toString() : '?'),
+              _infoCasilla('Casilla',
+                  snapshot.hasData ? snapshot.data[4].toString() : '?'),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  _infoCasilla(String texto,  data) {
+  _infoCasilla(String texto, data) {
     return Column(
       children: [
         Text(texto, style: TextStyle(fontSize: 10)),
@@ -134,16 +140,17 @@ class _HomePageState extends State<HomePage> {
         margin: EdgeInsets.only(top: (_screenSize.height * 0.6)),
         padding: EdgeInsets.symmetric(horizontal: 20.0),
         child: RaisedButton(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5.0)),
-            elevation: 0.5,
-            color: colorRosa,
-            textColor: Colors.white,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 55.0, vertical: 15.0),
-              child: Text('Capturar'),
-            ),
-            onPressed: isEnabled ? _tomarFoto : null,),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0)),
+          elevation: 0.5,
+          color: colorRosa,
+          textColor: Colors.white,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 55.0, vertical: 15.0),
+            child: Text('Capturar'),
+          ),
+          onPressed: isEnabled ? _tomarFoto : null,
+        ),
       ),
     );
   }
@@ -159,12 +166,12 @@ class _HomePageState extends State<HomePage> {
         _botonFoto = true;
         scanModel.valor = barcodeScanRes;
       });
-    }  
+    }
   }
 
   _tomarFoto() async {
     _procesarImagen(ImageSource.camera);
-    setState(() {  });    
+    setState(() {});
   }
 
   void _procesarImagen(ImageSource origin) async {
@@ -173,19 +180,18 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       if (pickedFile != null) {
         foto = File(pickedFile.path);
-        mostrarSnackbar('Imagen procesandose');           
+        mostrarSnackbar('Imagen procesandose');
         disableButton();
-      }      
+      }
     });
 
-    if (foto != null ) {
+    if (foto != null) {
       scanModel.fotoUrl = await scanListProvider.subirImagen(foto);
-      final test = await imageProvider.partidoData(); 
+      final test = await imageProvider.partidoData();
       foto = null;
       _botonFoto = false;
-    }    
-    setState(() { });
-
+    }
+    setState(() {});
   }
 
   Widget _appBar(BuildContext context) {
@@ -265,17 +271,67 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-   void mostrarSnackbar(String mensaje) {
+  void mostrarSnackbar(String mensaje) {
     final snackbar = SnackBar(
-      content: Container(   
-        child: Text(mensaje)
-        ),
+      content: Container(child: Text(mensaje)),
       backgroundColor: Colors.teal,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5))),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(5))),
       behavior: SnackBarBehavior.floating,
-      
       duration: Duration(milliseconds: 2000),
     );
     scaffoldKey.currentState.showSnackBar(snackbar);
+  }
+
+  Widget _tablaVotos() {
+    if (imageProvider.partidos.length > 0) {
+      print('if');
+      return Column(
+        children:[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+                child: Text('Votacion', style: tituloTabla,)
+                ),
+            ],
+          ),
+          
+          DataTable(
+          columns: const <DataColumn>[
+          DataColumn(label: Text('REPRESENTACIÓN')),
+          DataColumn(label: Text('LETRA')),
+          DataColumn(label: Text('NÚMERO')),
+        ], rows: const <DataRow>[
+          DataRow(
+            cells: <DataCell>[
+              DataCell(Text('Sarah')),
+              DataCell(Text('19')),
+              DataCell(Text('Student')),
+            ],
+          ),
+          DataRow(
+            cells: <DataCell>[
+              DataCell(Text('Sarah')),
+              DataCell(Text('19')),
+              DataCell(Text('Student')),
+            ],
+          ),
+          DataRow(
+            cells: <DataCell>[
+              DataCell(Text('Sarah')),
+              DataCell(Text('19')),
+              DataCell(Text('Student')),
+            ],
+          ),
+        ]),
+
+        ] 
+      );
+    } else {
+      print('else');
+      return Container();
+    }
   }
 }
