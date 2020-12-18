@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:ia_images/src/models/scan_model.dart';
 //import 'package:ia_images/src/providers/db_provider.dart';
 import 'package:ia_images/src/providers/scan_list_provider.dart';
+import 'package:ia_images/src/providers/image_ia_provider.dart';
 
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:image_picker/image_picker.dart';
@@ -19,19 +20,19 @@ class _HomePageState extends State<HomePage> {
 
   ScanModel scanModel = new ScanModel();
   ScanListProvider scanListProvider = new ScanListProvider();
-  final scaffoldKey = GlobalKey<ScaffoldState>();
+  ImageIAProvider imageProvider = new ImageIAProvider();
 
   String barcodeScanRes;
-
   bool _botonQr = true;
   bool _botonFoto = false;
-
   File foto;
+  bool isEnabled = true ;
+
+  final scaffoldKey = GlobalKey<ScaffoldState>();
   final picker = ImagePicker();
   final pieStyle = TextStyle(fontSize: 13.0, color: Colors.grey[500]);
   final Color colorRosa = Color.fromRGBO(237, 0, 140, 1);
   final List<dynamic> test = [];
-  bool isEnabled = true ;
 
   enableButton(){
     setState(() {
@@ -57,6 +58,7 @@ class _HomePageState extends State<HomePage> {
           _campos(),
           _botonQR(_screenSize),
           _botonImage(_screenSize),
+          
           _piePagina()
         ],
       ),
@@ -157,8 +159,7 @@ class _HomePageState extends State<HomePage> {
         _botonFoto = true;
         scanModel.valor = barcodeScanRes;
       });
-    }
-  
+    }  
   }
 
   _tomarFoto() async {
@@ -179,10 +180,10 @@ class _HomePageState extends State<HomePage> {
 
     if (foto != null ) {
       scanModel.fotoUrl = await scanListProvider.subirImagen(foto);
+      final test = await imageProvider.partidoData(); 
       foto = null;
       _botonFoto = false;
-    }
-    
+    }    
     setState(() { });
 
   }
