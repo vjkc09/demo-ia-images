@@ -25,6 +25,11 @@ class _HomePageState extends State<HomePage> {
   bool _botonQr = true;
   bool _botonFoto = false;
   bool _bloquearPartido = false;
+  bool _bloquearCandidatura = false;
+  bool _bloquearCoalicion = false;
+  bool _bloquearCandidatosNo = false;
+  bool _bloquearVotosNulos = false;
+  bool _bloquearTotal = false;
   File foto;
   bool isEnabled = true;
 
@@ -33,8 +38,8 @@ class _HomePageState extends State<HomePage> {
   final List<dynamic> test = [];
   final Color colorRosa = Color.fromRGBO(237, 0, 140, 1);
   final pieStyle = TextStyle(fontSize: 13.0, color: Colors.grey[500]);
-  final tituloTabla =  TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold);
-  final subtituloTabla =  TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold);
+  final tituloTabla = TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold);
+  final subtituloTabla = TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold);
 
   enableButton() {
     setState(() {
@@ -189,7 +194,8 @@ class _HomePageState extends State<HomePage> {
 
     if (foto != null) {
       scanModel.fotoUrl = await scanListProvider.subirImagen(foto);
-      final test = await imageProvider.partidoData();
+      await imageProvider.dataImage();
+      
       foto = null;
       _botonFoto = false;
     }
@@ -285,52 +291,232 @@ class _HomePageState extends State<HomePage> {
     scaffoldKey.currentState.showSnackBar(snackbar);
   }
 
-  Widget _tablaVotos(_screenSize)  {
+  Widget _tablaVotos(_screenSize) {
     //final List<Map<String, String>> listOfColumns = imageProvider.partidos;
-    final List<dynamic> listOfColumns =  imageProvider.partidos;
-    
-    if (imageProvider.partidos.length > 0) {
-      return Column(
-        children:[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Container(
+    final List<dynamic> listaPartidos = imageProvider.partidos;
+    final List<dynamic> listaCandidatura = imageProvider.candidaturaComun;
+    final List<dynamic> listaCoalicion = imageProvider.coalicion;
+    final List<dynamic> listaCandidatos = imageProvider.candidatosNoRegistrados;
+    final List<dynamic> listaVotosNulos = imageProvider.votosnulos;
+    final List<dynamic> listaTotal = imageProvider.total;
+
+    if (imageProvider.partidos.length > 0 ){
+      return Column(children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Container(
                 padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
-                child: Text('Votacion', style: tituloTabla,)
-                ),
-            ],
-          ),  
-           Row(
-            children: [
-               Expanded(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Theme(
-                      data:ThemeData(unselectedWidgetColor: colorRosa,),
-                      child: CheckboxListTile(
-                        activeColor: colorRosa,
-                        checkColor: Colors.white,
-                        title: Text('Partidos', style: subtituloTabla),
-                        value: _bloquearPartido,
-                        onChanged: (valor) {
-                          setState(() {
-                            _bloquearPartido = valor;
-                          });
-                        }),
-                    ),
+                child: Text(
+                  'Votacion',
+                  style: tituloTabla,
+                )),
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                child: Theme(
+                  data: ThemeData(
+                    unselectedWidgetColor: colorRosa,
                   ),
-               ),
+                  child: CheckboxListTile(
+                      activeColor: colorRosa,
+                      checkColor: Colors.white,
+                      title: Text('Partidos', style: subtituloTabla),
+                      value: _bloquearPartido,
+                      onChanged: (valor) {
+                        setState(() {
+                          _bloquearPartido = valor;
+                        });
+                      }),
+                ),
+              ),
+            ),
+          ],
+        ),
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: 0.0),
+          child: DataTable(
+            columns: const <DataColumn>[
+              DataColumn(label: Text('REP...')),
+              DataColumn(label: Text('LETRA')),
+              DataColumn(
+                  label: Text(
+                'NÚM...',
+                overflow: TextOverflow.ellipsis,
+              )),
             ],
-          ),            
-          Container(
+            rows:
+                listaPartidos // Loops through dataColumnText, each iteration assigning the value to element
+                    .map(
+                      ((element) => DataRow(
+                            cells: <DataCell>[
+                              DataCell(Container(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 10.0, horizontal: 0.0),
+                                  width: _screenSize.width * 0.1,
+                                  child: Image(
+                                      image: NetworkImage(element[
+                                          "rutalogopartido"])))), //Extracting from Map element the value
+                              DataCell(Container(
+                                width: _screenSize.width * 0.4,
+                                child: TextFormField(
+                                  initialValue: element["texto"],
+                                  onSaved: (value) => element["texto"] = value,
+                                  validator: (value) {
+                                    if (value.isEmpty) {
+                                      return 'Ingresar valor';
+                                    }
+                                    if (value.length < 3) {
+                                      return 'El valor requiere mas de dos caracteres';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              )),
+                              DataCell(Container(
+                                width: _screenSize.width * 0.1,
+                                child: TextFormField(
+                                  initialValue: element["numero"],
+                                  onSaved: (value) => element["numero"] = value,
+                                  validator: (value) {
+                                    if (value.isEmpty) {
+                                      return 'Ingresar valor';
+                                    }
+                                    if (value.length < 3) {
+                                      return 'El valor requiere mas de dos caracteres';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              )),
+                            ],
+                          )),
+                    )
+                    .toList(),
+          ),
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 20.0),
+                child: Theme(
+                  data: ThemeData(
+                    unselectedWidgetColor: colorRosa,
+                  ),
+                  child: CheckboxListTile(
+                      activeColor: colorRosa,
+                      checkColor: Colors.white,
+                      title: Text('Candidatura común', style: subtituloTabla),
+                      value: _bloquearCandidatura,
+                      onChanged: (valor) {
+                        setState(() {
+                          _bloquearCandidatura = valor;
+                        });
+                      }),
+                ),
+              ),
+            ),
+          ],
+        ),
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: 0.0),
+          child: DataTable(
+            columns: const <DataColumn>[
+              DataColumn(label: Text('REP...')),
+              DataColumn(label: Text('LETRA')),
+              DataColumn(
+                  label: Text(
+                'NÚM...',
+                overflow: TextOverflow.ellipsis,
+              )),
+            ],
+            rows:
+                listaCandidatura // Loops through dataColumnText, each iteration assigning the value to element
+                    .map(
+                      ((element) => DataRow(
+                            cells: <DataCell>[
+                              DataCell(Container(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 10.0, horizontal: 0.0),
+                                  width: _screenSize.width * 0.1,
+                                  child: Image(
+                                      image: NetworkImage(element[
+                                          "rutalogopartido"])))), //Extracting from Map element the value
+                              DataCell(Container(
+                                width: _screenSize.width * 0.4,
+                                child: TextFormField(
+                                  initialValue: element["texto"],
+                                  onSaved: (value) => element["texto"] = value,
+                                  validator: (value) {
+                                    if (value.isEmpty) {
+                                      return 'Ingresar valor';
+                                    }
+                                    if (value.length < 3) {
+                                      return 'El valor requiere mas de dos caracteres';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              )),
+                              DataCell(Container(
+                                width: _screenSize.width * 0.1,
+                                child: TextFormField(
+                                  initialValue: element["numero"],
+                                  onSaved: (value) => element["numero"] = value,
+                                  validator: (value) {
+                                    if (value.isEmpty) {
+                                      return 'Ingresar valor';
+                                    }
+                                    if (value.length < 3) {
+                                      return 'El valor requiere mas de dos caracteres';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              )),
+                            ],
+                          )),
+                    )
+                    .toList(),
+          ),
+        ),
+         Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                child: Theme(
+                  data: ThemeData(
+                    unselectedWidgetColor: colorRosa,
+                  ),
+                  child: CheckboxListTile(
+                      activeColor: colorRosa,
+                      checkColor: Colors.white,
+                      title: Text('Coalición', style: subtituloTabla),
+                      value: _bloquearCoalicion,
+                      onChanged: (valor) {
+                        setState(() {
+                          _bloquearCoalicion = valor;
+                        });
+                      }),
+                ),
+              ),
+            ),
+          ],
+        ),
+         Container(
           margin: EdgeInsets.symmetric(horizontal: 0.0),
           child: DataTable(
             columns: const <DataColumn>[
             DataColumn(label: Text('REP...')),
             DataColumn(label: Text('LETRA')),
             DataColumn(label: Text('NÚM...', overflow:  TextOverflow.ellipsis,)),
-        ], rows: listOfColumns // Loops through dataColumnText, each iteration assigning the value to element
+        ], rows: listaCoalicion // Loops through dataColumnText, each iteration assigning the value to element
                 .map(
                   ((element) => DataRow(
                         cells: <DataCell>[
@@ -385,10 +571,238 @@ class _HomePageState extends State<HomePage> {
                 .toList(),
           ),
         ),
-        ] 
-      );
+         Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                child: Theme(
+                  data: ThemeData(
+                    unselectedWidgetColor: colorRosa,
+                  ),
+                  child: CheckboxListTile(
+                      activeColor: colorRosa,
+                      checkColor: Colors.white,
+                      title: Text('Candidatos/as no registrad...', style: subtituloTabla),
+                      value: _bloquearCandidatosNo,
+                      onChanged: (valor) {
+                        setState(() {
+                          _bloquearCandidatosNo = valor;
+                        });
+                      }),
+                ),
+              ),
+            ),
+          ],
+        ),
+         Container(
+          margin: EdgeInsets.symmetric(horizontal: 0.0),
+          child: DataTable(
+            columns: const <DataColumn>[
+            DataColumn(label: Text('LETRA')),
+            DataColumn(label: Text('NÚM...', overflow:  TextOverflow.ellipsis,)),
+        ], rows: listaCandidatos // Loops through dataColumnText, each iteration assigning the value to element
+                .map(
+                  ((element) => DataRow(
+                        cells: <DataCell>[
+                         //Extracting from Map element the value
+                          DataCell(
+                            Container(
+                             // width: _screenSize.width * 0.4,
+                              child: TextFormField(
+                                initialValue: element["texto"],
+                                onSaved: (value) => element["texto"] = value,
+                                validator: (value) {
+                                  if (value.isEmpty) {
+                                    return 'Ingresar valor';
+                                  }
+                                  if (value.length < 3) {
+                                    return 'El valor requiere mas de dos caracteres';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            )
+                          ),
+                          DataCell(
+                            Container(
+                              //width: _screenSize.width * 0.1,
+                              child: TextFormField(
+                                initialValue: element["numero"],
+                                onSaved: (value) => element["numero"] = value,
+                                validator: (value) {
+                                  if (value.isEmpty) {
+                                    return 'Ingresar valor';
+                                  }
+                                  if (value.length < 3) {
+                                    return 'El valor requiere mas de dos caracteres';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            )
+                          ),
+                        ],
+                      )),
+                )
+                .toList(),
+          ),
+        ),
+         Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                child: Theme(
+                  data: ThemeData(
+                    unselectedWidgetColor: colorRosa,
+                  ),
+                  child: CheckboxListTile(
+                      activeColor: colorRosa,
+                      checkColor: Colors.white,
+                      title: Text('Votos nulos', style: subtituloTabla),
+                      value: _bloquearVotosNulos,
+                      onChanged: (valor) {
+                        setState(() {
+                          _bloquearVotosNulos = valor;
+                        });
+                      }),
+                ),
+              ),
+            ),
+          ],
+        ),
+         Container(
+          margin: EdgeInsets.symmetric(horizontal: 0.0),
+          child: DataTable(
+            columns: const <DataColumn>[
+            DataColumn(label: Text('LETRA')),
+            DataColumn(label: Text('NÚM...', overflow:  TextOverflow.ellipsis,)),
+        ], rows: listaVotosNulos // Loops through dataColumnText, each iteration assigning the value to element
+                .map(
+                  ((element) => DataRow(
+                        cells: <DataCell>[                        
+                          DataCell(
+                            Container(
+                              width: _screenSize.width * 0.4,
+                              child: TextFormField(
+                                initialValue: element["texto"],
+                                onSaved: (value) => element["texto"] = value,
+                                validator: (value) {
+                                  if (value.isEmpty) {
+                                    return 'Ingresar valor';
+                                  }
+                                  if (value.length < 3) {
+                                    return 'El valor requiere mas de dos caracteres';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            )
+                          ),
+                          DataCell(
+                            Container(
+                              width: _screenSize.width * 0.1,
+                              child: TextFormField(
+                                initialValue: element["numero"],
+                                onSaved: (value) => element["numero"] = value,
+                                validator: (value) {
+                                  if (value.isEmpty) {
+                                    return 'Ingresar valor';
+                                  }
+                                  if (value.length < 3) {
+                                    return 'El valor requiere mas de dos caracteres';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            )
+                          ),
+                        ],
+                      )),
+                )
+                .toList(),
+          ),
+        ),
+         Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                child: Theme(
+                  data: ThemeData(
+                    unselectedWidgetColor: colorRosa,
+                  ),
+                  child: CheckboxListTile(
+                      activeColor: colorRosa,
+                      checkColor: Colors.white,
+                      title: Text('Total', style: subtituloTabla),
+                      value: _bloquearTotal,
+                      onChanged: (valor) {
+                        setState(() {
+                          _bloquearTotal = valor;
+                        });
+                      }),
+                ),
+              ),
+            ),
+          ],
+        ),
+         Container(
+          margin: EdgeInsets.symmetric(horizontal: 0.0),
+          child: DataTable(
+            columns: const <DataColumn>[
+            DataColumn(label: Text('LETRA')),
+            DataColumn(label: Text('NÚM...', overflow:  TextOverflow.ellipsis,)),
+        ], rows: listaTotal // Loops through dataColumnText, each iteration assigning the value to element
+                .map(
+                  ((element) => DataRow(
+                        cells: <DataCell>[     
+                          DataCell(
+                            Container(
+                              width: _screenSize.width * 0.4,
+                              child: TextFormField(
+                                initialValue: element["texto"],
+                                onSaved: (value) => element["texto"] = value,
+                                validator: (value) {
+                                  if (value.isEmpty) {
+                                    return 'Ingresar valor';
+                                  }
+                                  if (value.length < 3) {
+                                    return 'El valor requiere mas de dos caracteres';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            )
+                          ),
+                          DataCell(
+                            Container(
+                              width: _screenSize.width * 0.1,
+                              child: TextFormField(
+                                initialValue: element["numero"],
+                                onSaved: (value) => element["numero"] = value,
+                                validator: (value) {
+                                  if (value.isEmpty) {
+                                    return 'Ingresar valor';
+                                  }
+                                  if (value.length < 3) {
+                                    return 'El valor requiere mas de dos caracteres';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            )
+                          ),
+                        ],
+                      )),
+                )
+                .toList(),
+          ),
+        ),
+      ]);
     } else {
-     // print('else');
+      // print('else');
       return Container();
     }
   }
