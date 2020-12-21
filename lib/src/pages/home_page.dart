@@ -24,6 +24,7 @@ class _HomePageState extends State<HomePage> {
   String barcodeScanRes;
   bool _botonQr = true;
   bool _botonFoto = false;
+  bool _botonEnviar = false;
   bool _bloquearPartido = false;
   bool _bloquearCandidatura = false;
   bool _bloquearCoalicion = false;
@@ -67,6 +68,7 @@ class _HomePageState extends State<HomePage> {
           _botonQR(_screenSize),
           _botonImage(_screenSize),
           _tablaVotos(_screenSize),
+          _botonEnviarLista(_screenSize),
           _piePagina()
         ],
       ),
@@ -162,6 +164,47 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void _checkList() {
+    if(_bloquearPartido && _bloquearCandidatura && _bloquearCoalicion && _bloquearCandidatosNo && _bloquearVotosNulos && _bloquearTotal){
+      enableButton();       
+    }
+    else{
+      disableButton();
+    }
+    setState(() {});
+  }
+
+  void _procesarInformacion() {
+     _checkList();  
+      Navigator.pushReplacementNamed(context, 'ready');    
+  }
+
+  _botonEnviarLista(_screenSize) {
+    
+    return Visibility(
+      visible: _botonEnviar,
+      child: Container(
+       // margin: EdgeInsets.only(top: (_screenSize.height * 0.6)),
+        padding: EdgeInsets.symmetric(horizontal: 20.0),
+        child: RaisedButton(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0)),
+          elevation: 0.5,
+          color: colorRosa,
+          textColor: Colors.white,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 55.0, vertical: 15.0),
+            child: Text('Enviar'),
+          ),
+          onPressed: isEnabled ? _procesarInformacion : null,
+        ),
+      ),
+    );
+
+
+  }
+  
+
   void _tomarQR() async {
     barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
         '#ED008C', 'Cancelar', false, ScanMode.QR);
@@ -198,6 +241,7 @@ class _HomePageState extends State<HomePage> {
       
       foto = null;
       _botonFoto = false;
+      _botonEnviar = true;
     }
     setState(() {});
   }
@@ -330,6 +374,7 @@ class _HomePageState extends State<HomePage> {
                       onChanged: (valor) {
                         setState(() {
                           _bloquearPartido = valor;
+                          _checkList();
                         });
                       }),
                 ),
@@ -338,7 +383,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         Container(
-          margin: EdgeInsets.symmetric(horizontal: 0.0),
+          padding: EdgeInsets.only(bottom: 20.0),
           child: DataTable(
             columns: const <DataColumn>[
               DataColumn(label: Text('REP...')),
@@ -416,6 +461,7 @@ class _HomePageState extends State<HomePage> {
                       onChanged: (valor) {
                         setState(() {
                           _bloquearCandidatura = valor;
+                          _checkList();
                         });
                       }),
                 ),
@@ -424,7 +470,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         Container(
-          margin: EdgeInsets.symmetric(horizontal: 0.0),
+          padding: EdgeInsets.only(bottom: 20.0),
           child: DataTable(
             columns: const <DataColumn>[
               DataColumn(label: Text('REP...')),
@@ -502,6 +548,7 @@ class _HomePageState extends State<HomePage> {
                       onChanged: (valor) {
                         setState(() {
                           _bloquearCoalicion = valor;
+                          _checkList();
                         });
                       }),
                 ),
@@ -510,7 +557,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
          Container(
-          margin: EdgeInsets.symmetric(horizontal: 0.0),
+          padding: EdgeInsets.only(bottom: 20.0),
           child: DataTable(
             columns: const <DataColumn>[
             DataColumn(label: Text('REP...')),
@@ -588,6 +635,7 @@ class _HomePageState extends State<HomePage> {
                       onChanged: (valor) {
                         setState(() {
                           _bloquearCandidatosNo = valor;
+                          _checkList();
                         });
                       }),
                 ),
@@ -596,7 +644,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
          Container(
-          margin: EdgeInsets.symmetric(horizontal: 0.0),
+          padding: EdgeInsets.only(bottom: 20.0),
           child: DataTable(
             columns: const <DataColumn>[
             DataColumn(label: Text('LETRA')),
@@ -665,6 +713,7 @@ class _HomePageState extends State<HomePage> {
                       onChanged: (valor) {
                         setState(() {
                           _bloquearVotosNulos = valor;
+                          _checkList();
                         });
                       }),
                 ),
@@ -673,7 +722,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
          Container(
-          margin: EdgeInsets.symmetric(horizontal: 0.0),
+          padding: EdgeInsets.only(bottom: 20.0),
           child: DataTable(
             columns: const <DataColumn>[
             DataColumn(label: Text('LETRA')),
@@ -741,6 +790,7 @@ class _HomePageState extends State<HomePage> {
                       onChanged: (valor) {
                         setState(() {
                           _bloquearTotal = valor;
+                          _checkList();
                         });
                       }),
                 ),
@@ -749,7 +799,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
          Container(
-          margin: EdgeInsets.symmetric(horizontal: 0.0),
+          padding: EdgeInsets.only(bottom: 30.0),
           child: DataTable(
             columns: const <DataColumn>[
             DataColumn(label: Text('LETRA')),
@@ -806,4 +856,6 @@ class _HomePageState extends State<HomePage> {
       return Container();
     }
   }
+
+  
 }
