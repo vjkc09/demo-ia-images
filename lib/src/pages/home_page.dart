@@ -608,7 +608,7 @@ class _HomePageState extends State<HomePage> {
                          //Extracting from Map element the value
                           DataCell(
                             Container(
-                             // width: _screenSize.width * 0.4,
+                              width: _screenSize.width * 0.6,
                               child: TextFormField(
                                 initialValue: element["texto"],
                                 onSaved: (value) => element["texto"] = value,
@@ -626,7 +626,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                           DataCell(
                             Container(
-                              //width: _screenSize.width * 0.1,
+                              width: _screenSize.width * 0.1,
                               child: TextFormField(
                                 initialValue: element["numero"],
                                 onSaved: (value) => element["numero"] = value,
@@ -684,7 +684,7 @@ class _HomePageState extends State<HomePage> {
                         cells: <DataCell>[                        
                           DataCell(
                             Container(
-                              width: _screenSize.width * 0.4,
+                              width: _screenSize.width * 0.6,
                               child: TextFormField(
                                 initialValue: element["texto"],
                                 onSaved: (value) => element["texto"] = value,
@@ -760,7 +760,7 @@ class _HomePageState extends State<HomePage> {
                         cells: <DataCell>[     
                           DataCell(
                             Container(
-                              width: _screenSize.width * 0.4,
+                              width: _screenSize.width * 0.6,
                               child: TextFormField(
                                 initialValue: element["texto"],
                                 onSaved: (value) => element["texto"] = value,
