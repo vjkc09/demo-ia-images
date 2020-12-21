@@ -24,6 +24,7 @@ class _HomePageState extends State<HomePage> {
   String barcodeScanRes;
   bool _botonQr = true;
   bool _botonFoto = false;
+  bool _bloquearPartido = false;
   File foto;
   bool isEnabled = true;
 
@@ -33,6 +34,7 @@ class _HomePageState extends State<HomePage> {
   final Color colorRosa = Color.fromRGBO(237, 0, 140, 1);
   final pieStyle = TextStyle(fontSize: 13.0, color: Colors.grey[500]);
   final tituloTabla =  TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold);
+  final subtituloTabla =  TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold);
 
   enableButton() {
     setState(() {
@@ -59,7 +61,7 @@ class _HomePageState extends State<HomePage> {
           _campos(),
           _botonQR(_screenSize),
           _botonImage(_screenSize),
-          _tablaVotos(),
+          _tablaVotos(_screenSize),
           _piePagina()
         ],
       ),
@@ -283,9 +285,11 @@ class _HomePageState extends State<HomePage> {
     scaffoldKey.currentState.showSnackBar(snackbar);
   }
 
-  Widget _tablaVotos() {
+  Widget _tablaVotos(_screenSize)  {
+    //final List<Map<String, String>> listOfColumns = imageProvider.partidos;
+    final List<dynamic> listOfColumns =  imageProvider.partidos;
+    
     if (imageProvider.partidos.length > 0) {
-      print('if');
       return Column(
         children:[
           Row(
@@ -296,41 +300,95 @@ class _HomePageState extends State<HomePage> {
                 child: Text('Votacion', style: tituloTabla,)
                 ),
             ],
-          ),
-          
-          DataTable(
-          columns: const <DataColumn>[
-          DataColumn(label: Text('REPRESENTACIÓN')),
-          DataColumn(label: Text('LETRA')),
-          DataColumn(label: Text('NÚMERO')),
-        ], rows: const <DataRow>[
-          DataRow(
-            cells: <DataCell>[
-              DataCell(Text('Sarah')),
-              DataCell(Text('19')),
-              DataCell(Text('Student')),
+          ),  
+           Row(
+            children: [
+               Expanded(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Theme(
+                      data:ThemeData(unselectedWidgetColor: colorRosa,),
+                      child: CheckboxListTile(
+                        activeColor: colorRosa,
+                        checkColor: Colors.white,
+                        title: Text('Partidos', style: subtituloTabla),
+                        value: _bloquearPartido,
+                        onChanged: (valor) {
+                          setState(() {
+                            _bloquearPartido = valor;
+                          });
+                        }),
+                    ),
+                  ),
+               ),
             ],
+          ),            
+          Container(
+          margin: EdgeInsets.symmetric(horizontal: 0.0),
+          child: DataTable(
+            columns: const <DataColumn>[
+            DataColumn(label: Text('REP...')),
+            DataColumn(label: Text('LETRA')),
+            DataColumn(label: Text('NÚM...', overflow:  TextOverflow.ellipsis,)),
+        ], rows: listOfColumns // Loops through dataColumnText, each iteration assigning the value to element
+                .map(
+                  ((element) => DataRow(
+                        cells: <DataCell>[
+                          DataCell(
+                            Container(
+                              padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 0.0),
+                              width: _screenSize.width * 0.1,                            
+                              child: Image(
+                                image: NetworkImage( element["rutalogopartido"])
+                                )
+                              )      
+                          ), //Extracting from Map element the value
+                          DataCell(
+                            Container(
+                              width: _screenSize.width * 0.4,
+                              child: TextFormField(
+                                initialValue: element["texto"],
+                                onSaved: (value) => element["texto"] = value,
+                                validator: (value) {
+                                  if (value.isEmpty) {
+                                    return 'Ingresar valor';
+                                  }
+                                  if (value.length < 3) {
+                                    return 'El valor requiere mas de dos caracteres';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            )
+                          ),
+                          DataCell(
+                            Container(
+                              width: _screenSize.width * 0.1,
+                              child: TextFormField(
+                                initialValue: element["numero"],
+                                onSaved: (value) => element["numero"] = value,
+                                validator: (value) {
+                                  if (value.isEmpty) {
+                                    return 'Ingresar valor';
+                                  }
+                                  if (value.length < 3) {
+                                    return 'El valor requiere mas de dos caracteres';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            )
+                          ),
+                        ],
+                      )),
+                )
+                .toList(),
           ),
-          DataRow(
-            cells: <DataCell>[
-              DataCell(Text('Sarah')),
-              DataCell(Text('19')),
-              DataCell(Text('Student')),
-            ],
-          ),
-          DataRow(
-            cells: <DataCell>[
-              DataCell(Text('Sarah')),
-              DataCell(Text('19')),
-              DataCell(Text('Student')),
-            ],
-          ),
-        ]),
-
+        ),
         ] 
       );
     } else {
-      print('else');
+     // print('else');
       return Container();
     }
   }

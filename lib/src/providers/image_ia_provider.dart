@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 
 class ImageIAProvider {
+  //List<Map<String, String>> partidos = [];
   List<dynamic> partidos = [];
   List<dynamic> candidaturacComun = [];
   List<dynamic> coalicion = [];
@@ -15,7 +16,7 @@ class ImageIAProvider {
   Future<List<dynamic>> partidoData() async{
     final res = await rootBundle.loadString('data/imagen.json');
     Map partidoMap = json.decode(res);
-    print(partidoMap['partido']);
+    //print(partidoMap['partido']);
     partidos = partidoMap['partido'];
     return partidos;
   }
