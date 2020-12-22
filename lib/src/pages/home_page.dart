@@ -2,6 +2,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:ia_images/src/models/scan_model.dart';
+import 'package:ia_images/src/providers/db_provider.dart';
 //import 'package:ia_images/src/providers/db_provider.dart';
 import 'package:ia_images/src/providers/scan_list_provider.dart';
 import 'package:ia_images/src/providers/image_ia_provider.dart';
@@ -25,6 +26,7 @@ class _HomePageState extends State<HomePage> {
   bool _botonQr = true;
   bool _botonFoto = false;
   bool _botonEnviar = false;
+  bool _tablaVotosData = true;
   bool _bloquearPartido = false;
   bool _bloquearCandidatura = false;
   bool _bloquearCoalicion = false;
@@ -176,11 +178,12 @@ class _HomePageState extends State<HomePage> {
 
   void _procesarInformacion() {
      _checkList();  
-      Navigator.pushReplacementNamed(context, 'ready');    
+    Navigator.pushReplacementNamed(context, 'ready'); 
+    _botonEnviar = false;  
+    _tablaVotosData = false; 
   }
 
-  _botonEnviarLista(_screenSize) {
-    
+  Widget _botonEnviarLista(_screenSize) {    
     return Visibility(
       visible: _botonEnviar,
       child: Container(
@@ -200,21 +203,35 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }  
 
-
-  }
-  
-
-  void _tomarQR() async {
+  _procesarQR() async {
     barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
         '#ED008C', 'Cancelar', false, ScanMode.QR);
-    scanListProvider.dataCasilla(barcodeScanRes);
+    final qr = await scanListProvider.dataCasilla(barcodeScanRes);
+    print('barcodeScanRes: $qr');    
+  }
+
+  void _tomarQR() async {
+    await _procesarQR();
+   
     if (barcodeScanRes != '-1') {
       mostrarSnackbar('Codigo QR procesado');
-      setState(() {
+       // Insertar codigo QR en sqlite
+        final tempScan = new ScanModel(valor: barcodeScanRes);
+        await  DBProvider.db.newScan(tempScan);
+
+        // Obtener el total de registros insertados
+        final listaScans = await DBProvider.db.getScans();
+        // Obtener la ultima posicion de la tabla scans
+        final id = listaScans.length;
+        // Obtener el ultimo registro
+        final scanQR = await DBProvider.db.getScanById(id);
+        final ultimoQR = scanQR.valor;
+        print('scanQR: $ultimoQR');
+        setState(() {
         _botonQr = false;
-        _botonFoto = true;
-        scanModel.valor = barcodeScanRes;
+        _botonFoto = true;        
       });
     }
   }
@@ -236,7 +253,7 @@ class _HomePageState extends State<HomePage> {
     });
 
     if (foto != null) {
-      scanModel.fotoUrl = await scanListProvider.subirImagen(foto);
+      await scanListProvider.subirImagen(foto);
       await imageProvider.dataImage();
       
       foto = null;
@@ -345,68 +362,241 @@ class _HomePageState extends State<HomePage> {
     final List<dynamic> listaTotal = imageProvider.total;
 
     if (imageProvider.partidos.length > 0 ){
-      return Column(children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Container(
-                padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
-                child: Text(
-                  'Votacion',
-                  style: tituloTabla,
+      return Visibility(
+        visible: _tablaVotosData,
+        child: Column(children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Container(
+                  padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+                  child: Text(
+                    'Votacion',
+                    style: tituloTabla,
+                  )),
+            ],
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Theme(
+                    data: ThemeData(
+                      unselectedWidgetColor: colorRosa,
+                    ),
+                    child: CheckboxListTile(
+                        activeColor: colorRosa,
+                        checkColor: Colors.white,
+                        title: Text('Partidos', style: subtituloTabla),
+                        value: _bloquearPartido,
+                        onChanged: (valor) {
+                          setState(() {
+                            _bloquearPartido = valor;
+                            _checkList();
+                          });
+                        }),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Container(
+            padding: EdgeInsets.only(bottom: 20.0),
+            child: DataTable(
+              columns: const <DataColumn>[
+                DataColumn(label: Text('REP...')),
+                DataColumn(label: Text('LETRA')),
+                DataColumn(
+                    label: Text(
+                  'NÚM...',
+                  overflow: TextOverflow.ellipsis,
                 )),
-          ],
-        ),
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                child: Theme(
-                  data: ThemeData(
-                    unselectedWidgetColor: colorRosa,
+              ],
+              rows:
+                  listaPartidos // Loops through dataColumnText, each iteration assigning the value to element
+                      .map(
+                        ((element) => DataRow(
+                              cells: <DataCell>[
+                                DataCell(Container(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: 10.0, horizontal: 0.0),
+                                    width: _screenSize.width * 0.1,
+                                    child: Image(
+                                        image: NetworkImage(element[
+                                            "rutalogopartido"])))), //Extracting from Map element the value
+                                DataCell(Container(
+                                  width: _screenSize.width * 0.4,
+                                  child: TextFormField(
+                                    initialValue: element["texto"],
+                                    onSaved: (value) => element["texto"] = value,
+                                    validator: (value) {
+                                      if (value.isEmpty) {
+                                        return 'Ingresar valor';
+                                      }
+                                      if (value.length < 3) {
+                                        return 'El valor requiere mas de dos caracteres';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                )),
+                                DataCell(Container(
+                                  width: _screenSize.width * 0.1,
+                                  child: TextFormField(
+                                    initialValue: element["numero"],
+                                    onSaved: (value) => element["numero"] = value,
+                                    validator: (value) {
+                                      if (value.isEmpty) {
+                                        return 'Ingresar valor';
+                                      }
+                                      if (value.length < 3) {
+                                        return 'El valor requiere mas de dos caracteres';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                )),
+                              ],
+                            )),
+                      )
+                      .toList(),
+            ),
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 20.0),
+                  child: Theme(
+                    data: ThemeData(
+                      unselectedWidgetColor: colorRosa,
+                    ),
+                    child: CheckboxListTile(
+                        activeColor: colorRosa,
+                        checkColor: Colors.white,
+                        title: Text('Candidatura común', style: subtituloTabla),
+                        value: _bloquearCandidatura,
+                        onChanged: (valor) {
+                          setState(() {
+                            _bloquearCandidatura = valor;
+                            _checkList();
+                          });
+                        }),
                   ),
-                  child: CheckboxListTile(
-                      activeColor: colorRosa,
-                      checkColor: Colors.white,
-                      title: Text('Partidos', style: subtituloTabla),
-                      value: _bloquearPartido,
-                      onChanged: (valor) {
-                        setState(() {
-                          _bloquearPartido = valor;
-                          _checkList();
-                        });
-                      }),
                 ),
               ),
+            ],
+          ),
+          Container(
+            padding: EdgeInsets.only(bottom: 20.0),
+            child: DataTable(
+              columns: const <DataColumn>[
+                DataColumn(label: Text('REP...')),
+                DataColumn(label: Text('LETRA')),
+                DataColumn(
+                    label: Text(
+                  'NÚM...',
+                  overflow: TextOverflow.ellipsis,
+                )),
+              ],
+              rows:
+                  listaCandidatura // Loops through dataColumnText, each iteration assigning the value to element
+                      .map(
+                        ((element) => DataRow(
+                              cells: <DataCell>[
+                                DataCell(Container(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: 10.0, horizontal: 0.0),
+                                    width: _screenSize.width * 0.1,
+                                    child: Image(
+                                        image: NetworkImage(element[
+                                            "rutalogopartido"])))), //Extracting from Map element the value
+                                DataCell(Container(
+                                  width: _screenSize.width * 0.4,
+                                  child: TextFormField(
+                                    initialValue: element["texto"],
+                                    onSaved: (value) => element["texto"] = value,
+                                    validator: (value) {
+                                      if (value.isEmpty) {
+                                        return 'Ingresar valor';
+                                      }
+                                      if (value.length < 3) {
+                                        return 'El valor requiere mas de dos caracteres';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                )),
+                                DataCell(Container(
+                                  width: _screenSize.width * 0.1,
+                                  child: TextFormField(
+                                    initialValue: element["numero"],
+                                    onSaved: (value) => element["numero"] = value,
+                                    validator: (value) {
+                                      if (value.isEmpty) {
+                                        return 'Ingresar valor';
+                                      }
+                                      if (value.length < 3) {
+                                        return 'El valor requiere mas de dos caracteres';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                )),
+                              ],
+                            )),
+                      )
+                      .toList(),
             ),
-          ],
-        ),
-        Container(
-          padding: EdgeInsets.only(bottom: 20.0),
-          child: DataTable(
-            columns: const <DataColumn>[
+          ),
+           Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Theme(
+                    data: ThemeData(
+                      unselectedWidgetColor: colorRosa,
+                    ),
+                    child: CheckboxListTile(
+                        activeColor: colorRosa,
+                        checkColor: Colors.white,
+                        title: Text('Coalición', style: subtituloTabla),
+                        value: _bloquearCoalicion,
+                        onChanged: (valor) {
+                          setState(() {
+                            _bloquearCoalicion = valor;
+                            _checkList();
+                          });
+                        }),
+                  ),
+                ),
+              ),
+            ],
+          ),
+           Container(
+            padding: EdgeInsets.only(bottom: 20.0),
+            child: DataTable(
+              columns: const <DataColumn>[
               DataColumn(label: Text('REP...')),
               DataColumn(label: Text('LETRA')),
-              DataColumn(
-                  label: Text(
-                'NÚM...',
-                overflow: TextOverflow.ellipsis,
-              )),
-            ],
-            rows:
-                listaPartidos // Loops through dataColumnText, each iteration assigning the value to element
-                    .map(
-                      ((element) => DataRow(
-                            cells: <DataCell>[
-                              DataCell(Container(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 10.0, horizontal: 0.0),
-                                  width: _screenSize.width * 0.1,
-                                  child: Image(
-                                      image: NetworkImage(element[
-                                          "rutalogopartido"])))), //Extracting from Map element the value
-                              DataCell(Container(
+              DataColumn(label: Text('NÚM...', overflow:  TextOverflow.ellipsis,)),
+          ], rows: listaCoalicion // Loops through dataColumnText, each iteration assigning the value to element
+                  .map(
+                    ((element) => DataRow(
+                          cells: <DataCell>[
+                            DataCell(
+                              Container(
+                                padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 0.0),
+                                width: _screenSize.width * 0.1,                            
+                                child: Image(
+                                  image: NetworkImage( element["rutalogopartido"])
+                                  )
+                                )      
+                            ), //Extracting from Map element the value
+                            DataCell(
+                              Container(
                                 width: _screenSize.width * 0.4,
                                 child: TextFormField(
                                   initialValue: element["texto"],
@@ -421,8 +611,10 @@ class _HomePageState extends State<HomePage> {
                                     return null;
                                   },
                                 ),
-                              )),
-                              DataCell(Container(
+                              )
+                            ),
+                            DataCell(
+                              Container(
                                 width: _screenSize.width * 0.1,
                                 child: TextFormField(
                                   initialValue: element["numero"],
@@ -437,64 +629,53 @@ class _HomePageState extends State<HomePage> {
                                     return null;
                                   },
                                 ),
-                              )),
-                            ],
-                          )),
-                    )
-                    .toList(),
+                              )
+                            ),
+                          ],
+                        )),
+                  )
+                  .toList(),
+            ),
           ),
-        ),
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 20.0),
-                child: Theme(
-                  data: ThemeData(
-                    unselectedWidgetColor: colorRosa,
+           Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Theme(
+                    data: ThemeData(
+                      unselectedWidgetColor: colorRosa,
+                    ),
+                    child: CheckboxListTile(
+                        activeColor: colorRosa,
+                        checkColor: Colors.white,
+                        title: Text('Candidatos/as no registrad...', style: subtituloTabla),
+                        value: _bloquearCandidatosNo,
+                        onChanged: (valor) {
+                          setState(() {
+                            _bloquearCandidatosNo = valor;
+                            _checkList();
+                          });
+                        }),
                   ),
-                  child: CheckboxListTile(
-                      activeColor: colorRosa,
-                      checkColor: Colors.white,
-                      title: Text('Candidatura común', style: subtituloTabla),
-                      value: _bloquearCandidatura,
-                      onChanged: (valor) {
-                        setState(() {
-                          _bloquearCandidatura = valor;
-                          _checkList();
-                        });
-                      }),
                 ),
               ),
-            ),
-          ],
-        ),
-        Container(
-          padding: EdgeInsets.only(bottom: 20.0),
-          child: DataTable(
-            columns: const <DataColumn>[
-              DataColumn(label: Text('REP...')),
-              DataColumn(label: Text('LETRA')),
-              DataColumn(
-                  label: Text(
-                'NÚM...',
-                overflow: TextOverflow.ellipsis,
-              )),
             ],
-            rows:
-                listaCandidatura // Loops through dataColumnText, each iteration assigning the value to element
-                    .map(
-                      ((element) => DataRow(
-                            cells: <DataCell>[
-                              DataCell(Container(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 10.0, horizontal: 0.0),
-                                  width: _screenSize.width * 0.1,
-                                  child: Image(
-                                      image: NetworkImage(element[
-                                          "rutalogopartido"])))), //Extracting from Map element the value
-                              DataCell(Container(
-                                width: _screenSize.width * 0.4,
+          ),
+           Container(
+            padding: EdgeInsets.only(bottom: 20.0),
+            child: DataTable(
+              columns: const <DataColumn>[
+              DataColumn(label: Text('LETRA')),
+              DataColumn(label: Text('NÚM...', overflow:  TextOverflow.ellipsis,)),
+          ], rows: listaCandidatos // Loops through dataColumnText, each iteration assigning the value to element
+                  .map(
+                    ((element) => DataRow(
+                          cells: <DataCell>[
+                           //Extracting from Map element the value
+                            DataCell(
+                              Container(
+                                width: _screenSize.width * 0.6,
                                 child: TextFormField(
                                   initialValue: element["texto"],
                                   onSaved: (value) => element["texto"] = value,
@@ -508,8 +689,10 @@ class _HomePageState extends State<HomePage> {
                                     return null;
                                   },
                                 ),
-                              )),
-                              DataCell(Container(
+                              )
+                            ),
+                            DataCell(
+                              Container(
                                 width: _screenSize.width * 0.1,
                                 child: TextFormField(
                                   initialValue: element["numero"],
@@ -524,333 +707,170 @@ class _HomePageState extends State<HomePage> {
                                     return null;
                                   },
                                 ),
-                              )),
-                            ],
-                          )),
-                    )
-                    .toList(),
+                              )
+                            ),
+                          ],
+                        )),
+                  )
+                  .toList(),
+            ),
           ),
-        ),
-         Row(
-          children: [
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                child: Theme(
-                  data: ThemeData(
-                    unselectedWidgetColor: colorRosa,
+           Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Theme(
+                    data: ThemeData(
+                      unselectedWidgetColor: colorRosa,
+                    ),
+                    child: CheckboxListTile(
+                        activeColor: colorRosa,
+                        checkColor: Colors.white,
+                        title: Text('Votos nulos', style: subtituloTabla),
+                        value: _bloquearVotosNulos,
+                        onChanged: (valor) {
+                          setState(() {
+                            _bloquearVotosNulos = valor;
+                            _checkList();
+                          });
+                        }),
                   ),
-                  child: CheckboxListTile(
-                      activeColor: colorRosa,
-                      checkColor: Colors.white,
-                      title: Text('Coalición', style: subtituloTabla),
-                      value: _bloquearCoalicion,
-                      onChanged: (valor) {
-                        setState(() {
-                          _bloquearCoalicion = valor;
-                          _checkList();
-                        });
-                      }),
                 ),
               ),
-            ),
-          ],
-        ),
-         Container(
-          padding: EdgeInsets.only(bottom: 20.0),
-          child: DataTable(
-            columns: const <DataColumn>[
-            DataColumn(label: Text('REP...')),
-            DataColumn(label: Text('LETRA')),
-            DataColumn(label: Text('NÚM...', overflow:  TextOverflow.ellipsis,)),
-        ], rows: listaCoalicion // Loops through dataColumnText, each iteration assigning the value to element
-                .map(
-                  ((element) => DataRow(
-                        cells: <DataCell>[
-                          DataCell(
-                            Container(
-                              padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 0.0),
-                              width: _screenSize.width * 0.1,                            
-                              child: Image(
-                                image: NetworkImage( element["rutalogopartido"])
-                                )
-                              )      
-                          ), //Extracting from Map element the value
-                          DataCell(
-                            Container(
-                              width: _screenSize.width * 0.4,
-                              child: TextFormField(
-                                initialValue: element["texto"],
-                                onSaved: (value) => element["texto"] = value,
-                                validator: (value) {
-                                  if (value.isEmpty) {
-                                    return 'Ingresar valor';
-                                  }
-                                  if (value.length < 3) {
-                                    return 'El valor requiere mas de dos caracteres';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            )
-                          ),
-                          DataCell(
-                            Container(
-                              width: _screenSize.width * 0.1,
-                              child: TextFormField(
-                                initialValue: element["numero"],
-                                onSaved: (value) => element["numero"] = value,
-                                validator: (value) {
-                                  if (value.isEmpty) {
-                                    return 'Ingresar valor';
-                                  }
-                                  if (value.length < 3) {
-                                    return 'El valor requiere mas de dos caracteres';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            )
-                          ),
-                        ],
-                      )),
-                )
-                .toList(),
+            ],
           ),
-        ),
-         Row(
-          children: [
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                child: Theme(
-                  data: ThemeData(
-                    unselectedWidgetColor: colorRosa,
+           Container(
+            padding: EdgeInsets.only(bottom: 20.0),
+            child: DataTable(
+              columns: const <DataColumn>[
+              DataColumn(label: Text('LETRA')),
+              DataColumn(label: Text('NÚM...', overflow:  TextOverflow.ellipsis,)),
+          ], rows: listaVotosNulos // Loops through dataColumnText, each iteration assigning the value to element
+                  .map(
+                    ((element) => DataRow(
+                          cells: <DataCell>[                        
+                            DataCell(
+                              Container(
+                                width: _screenSize.width * 0.6,
+                                child: TextFormField(
+                                  initialValue: element["texto"],
+                                  onSaved: (value) => element["texto"] = value,
+                                  validator: (value) {
+                                    if (value.isEmpty) {
+                                      return 'Ingresar valor';
+                                    }
+                                    if (value.length < 3) {
+                                      return 'El valor requiere mas de dos caracteres';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              )
+                            ),
+                            DataCell(
+                              Container(
+                                width: _screenSize.width * 0.1,
+                                child: TextFormField(
+                                  initialValue: element["numero"],
+                                  onSaved: (value) => element["numero"] = value,
+                                  validator: (value) {
+                                    if (value.isEmpty) {
+                                      return 'Ingresar valor';
+                                    }
+                                    if (value.length < 3) {
+                                      return 'El valor requiere mas de dos caracteres';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              )
+                            ),
+                          ],
+                        )),
+                  )
+                  .toList(),
+            ),
+          ),
+           Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Theme(
+                    data: ThemeData(
+                      unselectedWidgetColor: colorRosa,
+                    ),
+                    child: CheckboxListTile(
+                        activeColor: colorRosa,
+                        checkColor: Colors.white,
+                        title: Text('Total', style: subtituloTabla),
+                        value: _bloquearTotal,
+                        onChanged: (valor) {
+                          setState(() {
+                            _bloquearTotal = valor;
+                            _checkList();
+                          });
+                        }),
                   ),
-                  child: CheckboxListTile(
-                      activeColor: colorRosa,
-                      checkColor: Colors.white,
-                      title: Text('Candidatos/as no registrad...', style: subtituloTabla),
-                      value: _bloquearCandidatosNo,
-                      onChanged: (valor) {
-                        setState(() {
-                          _bloquearCandidatosNo = valor;
-                          _checkList();
-                        });
-                      }),
                 ),
               ),
-            ),
-          ],
-        ),
-         Container(
-          padding: EdgeInsets.only(bottom: 20.0),
-          child: DataTable(
-            columns: const <DataColumn>[
-            DataColumn(label: Text('LETRA')),
-            DataColumn(label: Text('NÚM...', overflow:  TextOverflow.ellipsis,)),
-        ], rows: listaCandidatos // Loops through dataColumnText, each iteration assigning the value to element
-                .map(
-                  ((element) => DataRow(
-                        cells: <DataCell>[
-                         //Extracting from Map element the value
-                          DataCell(
-                            Container(
-                              width: _screenSize.width * 0.6,
-                              child: TextFormField(
-                                initialValue: element["texto"],
-                                onSaved: (value) => element["texto"] = value,
-                                validator: (value) {
-                                  if (value.isEmpty) {
-                                    return 'Ingresar valor';
-                                  }
-                                  if (value.length < 3) {
-                                    return 'El valor requiere mas de dos caracteres';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            )
-                          ),
-                          DataCell(
-                            Container(
-                              width: _screenSize.width * 0.1,
-                              child: TextFormField(
-                                initialValue: element["numero"],
-                                onSaved: (value) => element["numero"] = value,
-                                validator: (value) {
-                                  if (value.isEmpty) {
-                                    return 'Ingresar valor';
-                                  }
-                                  if (value.length < 3) {
-                                    return 'El valor requiere mas de dos caracteres';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            )
-                          ),
-                        ],
-                      )),
-                )
-                .toList(),
+            ],
           ),
-        ),
-         Row(
-          children: [
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                child: Theme(
-                  data: ThemeData(
-                    unselectedWidgetColor: colorRosa,
-                  ),
-                  child: CheckboxListTile(
-                      activeColor: colorRosa,
-                      checkColor: Colors.white,
-                      title: Text('Votos nulos', style: subtituloTabla),
-                      value: _bloquearVotosNulos,
-                      onChanged: (valor) {
-                        setState(() {
-                          _bloquearVotosNulos = valor;
-                          _checkList();
-                        });
-                      }),
-                ),
-              ),
+           Container(
+            padding: EdgeInsets.only(bottom: 30.0),
+            child: DataTable(
+              columns: const <DataColumn>[
+              DataColumn(label: Text('LETRA')),
+              DataColumn(label: Text('NÚM...', overflow:  TextOverflow.ellipsis,)),
+          ], rows: listaTotal // Loops through dataColumnText, each iteration assigning the value to element
+                  .map(
+                    ((element) => DataRow(
+                          cells: <DataCell>[     
+                            DataCell(
+                              Container(
+                                width: _screenSize.width * 0.6,
+                                child: TextFormField(
+                                  initialValue: element["texto"],
+                                  onSaved: (value) => element["texto"] = value,
+                                  validator: (value) {
+                                    if (value.isEmpty) {
+                                      return 'Ingresar valor';
+                                    }
+                                    if (value.length < 3) {
+                                      return 'El valor requiere mas de dos caracteres';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              )
+                            ),
+                            DataCell(
+                              Container(
+                                width: _screenSize.width * 0.1,
+                                child: TextFormField(
+                                  initialValue: element["numero"],
+                                  onSaved: (value) => element["numero"] = value,
+                                  validator: (value) {
+                                    if (value.isEmpty) {
+                                      return 'Ingresar valor';
+                                    }
+                                    if (value.length < 3) {
+                                      return 'El valor requiere mas de dos caracteres';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              )
+                            ),
+                          ],
+                        )),
+                  )
+                  .toList(),
             ),
-          ],
-        ),
-         Container(
-          padding: EdgeInsets.only(bottom: 20.0),
-          child: DataTable(
-            columns: const <DataColumn>[
-            DataColumn(label: Text('LETRA')),
-            DataColumn(label: Text('NÚM...', overflow:  TextOverflow.ellipsis,)),
-        ], rows: listaVotosNulos // Loops through dataColumnText, each iteration assigning the value to element
-                .map(
-                  ((element) => DataRow(
-                        cells: <DataCell>[                        
-                          DataCell(
-                            Container(
-                              width: _screenSize.width * 0.6,
-                              child: TextFormField(
-                                initialValue: element["texto"],
-                                onSaved: (value) => element["texto"] = value,
-                                validator: (value) {
-                                  if (value.isEmpty) {
-                                    return 'Ingresar valor';
-                                  }
-                                  if (value.length < 3) {
-                                    return 'El valor requiere mas de dos caracteres';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            )
-                          ),
-                          DataCell(
-                            Container(
-                              width: _screenSize.width * 0.1,
-                              child: TextFormField(
-                                initialValue: element["numero"],
-                                onSaved: (value) => element["numero"] = value,
-                                validator: (value) {
-                                  if (value.isEmpty) {
-                                    return 'Ingresar valor';
-                                  }
-                                  if (value.length < 3) {
-                                    return 'El valor requiere mas de dos caracteres';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            )
-                          ),
-                        ],
-                      )),
-                )
-                .toList(),
           ),
-        ),
-         Row(
-          children: [
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                child: Theme(
-                  data: ThemeData(
-                    unselectedWidgetColor: colorRosa,
-                  ),
-                  child: CheckboxListTile(
-                      activeColor: colorRosa,
-                      checkColor: Colors.white,
-                      title: Text('Total', style: subtituloTabla),
-                      value: _bloquearTotal,
-                      onChanged: (valor) {
-                        setState(() {
-                          _bloquearTotal = valor;
-                          _checkList();
-                        });
-                      }),
-                ),
-              ),
-            ),
-          ],
-        ),
-         Container(
-          padding: EdgeInsets.only(bottom: 30.0),
-          child: DataTable(
-            columns: const <DataColumn>[
-            DataColumn(label: Text('LETRA')),
-            DataColumn(label: Text('NÚM...', overflow:  TextOverflow.ellipsis,)),
-        ], rows: listaTotal // Loops through dataColumnText, each iteration assigning the value to element
-                .map(
-                  ((element) => DataRow(
-                        cells: <DataCell>[     
-                          DataCell(
-                            Container(
-                              width: _screenSize.width * 0.6,
-                              child: TextFormField(
-                                initialValue: element["texto"],
-                                onSaved: (value) => element["texto"] = value,
-                                validator: (value) {
-                                  if (value.isEmpty) {
-                                    return 'Ingresar valor';
-                                  }
-                                  if (value.length < 3) {
-                                    return 'El valor requiere mas de dos caracteres';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            )
-                          ),
-                          DataCell(
-                            Container(
-                              width: _screenSize.width * 0.1,
-                              child: TextFormField(
-                                initialValue: element["numero"],
-                                onSaved: (value) => element["numero"] = value,
-                                validator: (value) {
-                                  if (value.isEmpty) {
-                                    return 'Ingresar valor';
-                                  }
-                                  if (value.length < 3) {
-                                    return 'El valor requiere mas de dos caracteres';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            )
-                          ),
-                        ],
-                      )),
-                )
-                .toList(),
-          ),
-        ),
-      ]);
+        ]),
+      );
     } else {
       // print('else');
       return Container();

@@ -22,7 +22,7 @@ class ReadyPage extends StatelessWidget {
             _titulo(),
             _subtitulo('Enviaste la  lista'),
             _subtitulo('de votos tu casilla'),
-            _botonEntendido(_screenSize),
+            _botonEntendido(context, _screenSize),
             _piePagina(),
           ],
         )
@@ -51,7 +51,7 @@ class ReadyPage extends StatelessWidget {
         style: TextStyle(color: Colors.white, fontSize: 15.0, height: 2.0));
   }
 
-  Widget _botonEntendido(_screenSize) {
+  Widget _botonEntendido(BuildContext context, _screenSize) {
     return Container(
       margin: EdgeInsets.only(top: 40, bottom: 140),
       child: RaisedButton(
@@ -70,7 +70,9 @@ class ReadyPage extends StatelessWidget {
                     )
                     ),
           ),
-          onPressed: () {}),
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, 'home'); 
+          }),
     );
   }
 
