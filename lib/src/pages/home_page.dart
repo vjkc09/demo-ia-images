@@ -60,6 +60,13 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     // Obtener el tamaño de los medios de comunicación actuales
     final _screenSize = MediaQuery.of(context).size;
+    Map parametros = ModalRoute.of(context).settings.arguments;
+    print('parametros: $parametros');
+    if(parametros != null) {
+      print('si');
+      _botonQr = parametros['botonQr'];
+    }
+
     return Scaffold(
       key: scaffoldKey,
       appBar: _appBar(context),

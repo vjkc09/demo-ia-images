@@ -71,7 +71,8 @@ class ReadyPage extends StatelessWidget {
                     ),
           ),
           onPressed: () {
-            Navigator.pushReplacementNamed(context, 'home'); 
+            bool botonQr = false;
+            Navigator.pushReplacementNamed(context, 'home', arguments: {'botonQr': botonQr }); 
           }),
     );
   }
