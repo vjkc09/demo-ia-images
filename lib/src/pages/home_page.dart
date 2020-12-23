@@ -61,10 +61,9 @@ class _HomePageState extends State<HomePage> {
     // Obtener el tamaño de los medios de comunicación actuales
     final _screenSize = MediaQuery.of(context).size;
     Map parametros = ModalRoute.of(context).settings.arguments;
-    print('parametros: $parametros');
     if(parametros != null) {
-      print('si');
       _botonQr = parametros['botonQr'];
+       _infoCasillaQR();     
     }
 
     return Scaffold(
@@ -212,11 +211,21 @@ class _HomePageState extends State<HomePage> {
     );
   }  
 
+  _infoCasillaQR() async {
+    // Obtener el total de registros insertados
+        final listaScans = await DBProvider.db.getScans();
+        // Obtener la ultima posicion de la tabla scans
+        final id = listaScans.length;
+        // Obtener el ultimo registro
+        final scanQR = await DBProvider.db.getScanById(id);
+        final String ultimoQR = scanQR.valor;
+        await scanListProvider.dataCasilla(ultimoQR);   
+  } 
+
   _procesarQR() async {
     barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
         '#ED008C', 'Cancelar', false, ScanMode.QR);
-    final qr = await scanListProvider.dataCasilla(barcodeScanRes);
-    print('barcodeScanRes: $qr');    
+    await scanListProvider.dataCasilla(barcodeScanRes);
   }
 
   void _tomarQR() async {
@@ -228,14 +237,7 @@ class _HomePageState extends State<HomePage> {
         final tempScan = new ScanModel(valor: barcodeScanRes);
         await  DBProvider.db.newScan(tempScan);
 
-        // Obtener el total de registros insertados
-        final listaScans = await DBProvider.db.getScans();
-        // Obtener la ultima posicion de la tabla scans
-        final id = listaScans.length;
-        // Obtener el ultimo registro
-        final scanQR = await DBProvider.db.getScanById(id);
-        final ultimoQR = scanQR.valor;
-        print('scanQR: $ultimoQR');
+        
         setState(() {
         _botonQr = false;
         _botonFoto = true;        
