@@ -9,6 +9,7 @@ import 'package:ia_images/src/providers/image_ia_provider.dart';
 
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   //const HomePage({Key key}) : super//(key: key);
@@ -35,6 +36,7 @@ class _HomePageState extends State<HomePage> {
   bool _bloquearTotal = false;
   File foto;
   bool isEnabled = true;
+  bool votosEnviados = false;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final picker = ImagePicker();
@@ -43,6 +45,7 @@ class _HomePageState extends State<HomePage> {
   final pieStyle = TextStyle(fontSize: 13.0, color: Colors.grey[500]);
   final tituloTabla = TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold);
   final subtituloTabla = TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold);
+  final date = new DateFormat('yyyy-MM-dd hh:mm');
 
   enableButton() {
     setState(() {
@@ -62,8 +65,10 @@ class _HomePageState extends State<HomePage> {
     final _screenSize = MediaQuery.of(context).size;
     Map parametros = ModalRoute.of(context).settings.arguments;
     if(parametros != null) {
+       votosEnviados = parametros['votosEnviados'];
       _botonQr = parametros['botonQr'];
-       _infoCasillaQR();     
+       _infoCasillaQR();    
+       
     }
 
     return Scaffold(
@@ -77,6 +82,7 @@ class _HomePageState extends State<HomePage> {
           _botonImage(_screenSize),
           _tablaVotos(_screenSize),
           _botonEnviarLista(_screenSize),
+          _votosEnviados(),
           _piePagina()
         ],
       ),
@@ -219,7 +225,8 @@ class _HomePageState extends State<HomePage> {
         // Obtener el ultimo registro
         final scanQR = await DBProvider.db.getScanById(id);
         final String ultimoQR = scanQR.valor;
-        await scanListProvider.dataCasilla(ultimoQR);   
+        await scanListProvider.dataCasilla(ultimoQR);  
+        _votosEnviados(); 
   } 
 
   _procesarQR() async {
@@ -884,6 +891,42 @@ class _HomePageState extends State<HomePage> {
       // print('else');
       return Container();
     }
+  }
+
+  Widget _votosEnviados() {
+    final  screenSize = MediaQuery.of(context).size;
+    return Visibility(
+        visible: votosEnviados,
+          child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 20.0),
+        child: Row(
+          children: [
+            Padding(
+              padding:  EdgeInsets.only(bottom: screenSize.height * 0.5),
+              child: Column(
+                children: [
+                      Padding(
+                      padding: const EdgeInsets.only(bottom: 20, top: 30.0),
+                      child: Row(
+                        children:[ 
+                        Padding(
+                          padding: const EdgeInsets.only(right: 10.0,),
+                          child: Icon(Icons.check, size: 25, color: Colors.pink),
+                        ),
+                        Text('Votos enviados',  style: TextStyle(fontSize: 15.0))
+                        ]
+                      ),
+                    ),              
+                  Text(
+                    DateFormat('dd / MM / yyyy | HH:mm').format(DateTime.now()).toString() +' h', 
+                    style: TextStyle(fontSize: 15.0, color: Colors.grey)),
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
   }
 
   
